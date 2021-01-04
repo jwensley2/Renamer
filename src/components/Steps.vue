@@ -35,7 +35,7 @@
 <script lang="ts">
 import {computed, defineComponent} from 'vue';
 import Step from '@/step';
-import {TransformationTypes} from '@/transformations/transformation';
+import {TransformerType} from '@/transformers/transformer';
 import {useStore} from '@/store';
 
 export default defineComponent({
@@ -46,7 +46,7 @@ export default defineComponent({
         return {
             steps: steps,
             addStep: () => {
-                const step = new Step('', TransformationTypes.ChangeCase);
+                const step = new Step('', TransformerType.ChangeCase);
 
                 store.commit('addStep', step);
                 emit('edit-step', step);

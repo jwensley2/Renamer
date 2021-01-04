@@ -1,4 +1,4 @@
-import {Transformation} from '@/transformations/transformation';
+import {Transformer} from '@/transformers/transformer';
 import SelectedFile, {Part} from '@/file';
 
 export type Options = {
@@ -9,7 +9,7 @@ export type Options = {
     caseInsensitive: boolean,
 };
 
-export class Replace implements Transformation {
+export class Replace implements Transformer {
     private options: Options;
     private defaults: Options = {
         part: Part.Name,

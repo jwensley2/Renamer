@@ -1,8 +1,8 @@
 import {InjectionKey} from 'vue';
 import {createStore, Store, useStore as baseUseStore} from 'vuex';
 import Step from './step';
-import {TransformationTypes} from '@/transformations/transformation';
-import {Case} from '@/transformations/change-case';
+import {TransformerType} from '@/transformers/transformer';
+import {Case} from '@/transformers/change-case';
 import SelectedFile from '@/file';
 import _ from 'lodash';
 import Config from 'electron-store';
@@ -24,10 +24,10 @@ export const store = createStore<State>({
     state(): State {
         const defaultPresets = [
             new Preset('Default', [
-                new Step('Change to Lowercase', TransformationTypes.ChangeCase),
-                new Step('Replace Underscores', TransformationTypes.Replace, {search: '_', replace: ' '}),
-                new Step('Replace Dashes', TransformationTypes.Replace, {search: '-+(\s*)-+', replace: '-'}),
-                new Step('Replace List', TransformationTypes.ReplaceList, {
+                new Step('Change to Lowercase', TransformerType.ChangeCase),
+                new Step('Replace Underscores', TransformerType.Replace, {search: '_', replace: ' '}),
+                new Step('Replace Dashes', TransformerType.Replace, {search: '-+(\s*)-+', replace: '-'}),
+                new Step('Replace List', TransformerType.ReplaceList, {
                     replacements: [
                         {
                             search: /plane/.source,
@@ -43,7 +43,7 @@ export const store = createStore<State>({
                         },
                     ],
                 }),
-                new Step('Change to Titlecase', TransformationTypes.ChangeCase, {case: Case.TitleCase}),
+                new Step('Change to Titlecase', TransformerType.ChangeCase, {case: Case.TitleCase}),
             ]),
         ];
 

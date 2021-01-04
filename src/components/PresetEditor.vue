@@ -34,12 +34,8 @@
 </template>
 
 <script lang="ts">
-import {label as transformationLabel, TransformationTypes} from '@/transformations/transformation';
 import {defineComponent, reactive} from 'vue';
 import _ from 'lodash';
-import {Case, caseLabel} from '@/transformations/change-case';
-import ReplaceListOptions from '@/components/ReplaceListOptions.vue';
-import ReplaceOptions from '@/components/ReplaceOptions.vue';
 
 export default defineComponent({
     name: 'PresetEditor',

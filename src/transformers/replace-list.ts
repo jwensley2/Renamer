@@ -1,4 +1,4 @@
-import {Transformation} from '@/transformations/transformation';
+import {Transformer} from '@/transformers/transformer';
 import SelectedFile, {Part} from '@/file';
 
 type Replacement = {
@@ -13,7 +13,7 @@ export type Options = {
     replacements: Array<Replacement>
 };
 
-export class ReplaceList implements Transformation {
+export class ReplaceList implements Transformer {
     private options: Options;
     private defaults: Options = {
         part: Part.Name,

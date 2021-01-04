@@ -4,8 +4,8 @@
 
         <div class="my-2">
             <label>Type</label>
-            <select v-model="step.transformation" class="text-input">
-                <option v-for="type in TransformationTypes" :key="type" :value="type">{{ transformationLabel(type) }}</option>
+            <select v-model="step.transformer" class="text-input">
+                <option v-for="type in TransformerType" :key="type" :value="type">{{ transformerLabel(type) }}</option>
             </select>
         </div>
 
@@ -19,7 +19,7 @@
             >
         </div>
 
-        <template v-if="step.transformation === TransformationTypes.ChangeCase">
+        <template v-if="step.transformer === TransformerType.ChangeCase">
             <div class="my-2">
                 <label>Change Case To</label>
                 <select v-model="step.options.case" class="text-input">
@@ -27,11 +27,22 @@
                 </select>
             </div>
         </template>
-        <template v-else-if="step.transformation === TransformationTypes.Replace">
+        <template v-else-if="step.transformer === TransformerType.Replace">
             <replace-options v-model="step.options"></replace-options>
         </template>
-        <template v-else-if="step.transformation === TransformationTypes.ReplaceList">
+        <template v-else-if="step.transformer === TransformerType.ReplaceList">
             <replace-list-options v-model="step.options"></replace-list-options>
+        </template>
+        <template v-else-if="step.transformer === TransformerType.Trim">
+            <div class="my-2">
+                <label for="trim-characters">Characters</label>
+                <input
+                    id="trim-characters"
+                    v-model="step.options.characters"
+                    class="text-input"
+                    type="text"
+                >
+            </div>
         </template>
 
         <div class="flex flex-1 justify-between mt-10">
@@ -56,10 +67,10 @@
 </template>
 
 <script lang="ts">
-import {label as transformationLabel, TransformationTypes} from '@/transformations/transformation';
+import {label as transformerLabel, TransformerType} from '@/transformers/transformer';
 import {defineComponent, reactive} from 'vue';
 import _ from 'lodash';
-import {Case, caseLabel} from '@/transformations/change-case';
+import {Case, caseLabel} from '@/transformers/change-case';
 import ReplaceListOptions from '@/components/ReplaceListOptions.vue';
 import ReplaceOptions from '@/components/ReplaceOptions.vue';
 
@@ -79,8 +90,8 @@ export default defineComponent({
 
         return {
             step: step,
-            TransformationTypes: TransformationTypes,
-            transformationLabel: transformationLabel,
+            TransformerType: TransformerType,
+            transformerLabel: transformerLabel,
             Case: Case,
             caseLabel: caseLabel,
             save: () => {

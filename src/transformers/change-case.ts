@@ -1,4 +1,4 @@
-import {Transformation} from '@/transformations/transformation';
+import {Transformer} from '@/transformers/transformer';
 import SelectedFile, {Part} from '@/file';
 
 export enum Case {
@@ -23,7 +23,7 @@ export type Options = {
     case: Case
 }
 
-export class ChangeCase implements Transformation {
+export class ChangeCase implements Transformer {
     private options: Options;
     private defaults: Options = {
         part: Part.Name,
