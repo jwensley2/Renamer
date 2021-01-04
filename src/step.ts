@@ -14,7 +14,7 @@ export default class Step {
         this.id = uuidv4();
         this.label = label;
         this.transformer = transformer;
-        this.options = options;
+        this.options = this.mergeOptionsWithDefaults(options);
     }
 
     static fromJSON(json: Record<string, unknown>): Step {
@@ -29,5 +29,10 @@ export default class Step {
         const transformer = TransformerFactory.makeTransformer(this.transformer, this.options);
 
         transformer.transform(file);
+    }
+
+    public mergeOptionsWithDefaults(options = {}): Record<string, unknown> {
+        const transformer = TransformerFactory.makeTransformer(this.transformer, {});
+        return Object.assign({}, transformer.defaultOptions(), options);
     }
 }

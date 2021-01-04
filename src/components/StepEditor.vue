@@ -4,7 +4,7 @@
 
         <div class="my-2">
             <label>Type</label>
-            <select v-model="step.transformer" class="text-input">
+            <select v-model="step.transformer" class="text-input" @change="transformerChanged">
                 <option v-for="type in TransformerType" :key="type" :value="type">{{ transformerLabel(type) }}</option>
             </select>
         </div>
@@ -21,10 +21,21 @@
 
         <template v-if="step.transformer === TransformerType.ChangeCase">
             <div class="my-2">
-                <label>Change Case To</label>
-                <select v-model="step.options.case" class="text-input">
-                    <option v-for="textCase in Case" :key="textCase" :value="textCase">{{ caseLabel(textCase) }}</option>
-                </select>
+                <label>
+                    Part
+                    <select v-model="step.options.part" class="text-input">
+                        <option v-for="part in Part" :key="part" :value="part">{{ part }}</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="my-2">
+                <label>
+                    Change Case To
+                    <select v-model="step.options.case" class="text-input">
+                        <option v-for="textCase in Case" :key="textCase" :value="textCase">{{ caseLabel(textCase) }}</option>
+                    </select>
+                </label>
             </div>
         </template>
         <template v-else-if="step.transformer === TransformerType.Replace">
@@ -68,11 +79,13 @@
 
 <script lang="ts">
 import {label as transformerLabel, TransformerType} from '@/transformers/transformer';
-import {defineComponent, reactive} from 'vue';
+import {computed, defineComponent, reactive} from 'vue';
 import _ from 'lodash';
 import {Case, caseLabel} from '@/transformers/change-case';
 import ReplaceListOptions from '@/components/ReplaceListOptions.vue';
 import ReplaceOptions from '@/components/ReplaceOptions.vue';
+import {Part} from '@/file';
+import Step from '@/step';
 
 export default defineComponent({
     name: 'StepEditor',
@@ -86,13 +99,16 @@ export default defineComponent({
         'delete',
     ],
     setup(props, {emit}): Record<string, unknown> {
-        const step = reactive(_.cloneDeep(props.modelValue));
+        const step = reactive(_.cloneDeep(props.modelValue)) as Step;
 
         return {
             step: step,
             TransformerType: TransformerType,
             transformerLabel: transformerLabel,
             Case: Case,
+            Part: computed(() => {
+                return _.filter(Part, (part) => typeof (part) === 'string');
+            }),
             caseLabel: caseLabel,
             save: () => {
                 emit('update:modelValue', step);
@@ -103,6 +119,9 @@ export default defineComponent({
             },
             deleteStep: () => {
                 emit('delete', step);
+            },
+            transformerChanged: () => {
+                step.options = step.mergeOptionsWithDefaults(step.options);
             },
         };
     },

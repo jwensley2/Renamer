@@ -23,4 +23,8 @@ export class Trim implements Transformer {
 
         file.setPart(part, _.trim(file.getPart(part), this.options.characters));
     }
+
+    defaultOptions(): Record<string, unknown> {
+        return this.defaults;
+    }
 }

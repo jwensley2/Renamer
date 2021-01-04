@@ -34,4 +34,8 @@ export class Replace implements Transformer {
 
         file.setPart(part, file.getPart(part).replaceAll(search, this.options.replace));
     }
+
+    defaultOptions(): Record<string, unknown> {
+        return this.defaults;
+    }
 }

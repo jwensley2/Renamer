@@ -45,4 +45,8 @@ export class ReplaceList implements Transformer {
             file.setPart(part, file.getPart(part).replaceAll(search, replacement.replace || ''));
         });
     }
+
+    defaultOptions(): Record<string, unknown> {
+        return this.defaults;
+    }
 }

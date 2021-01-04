@@ -28,6 +28,8 @@ export function label(transformation: TransformerType): string {
 
 export interface Transformer {
     transform(file: SelectedFile): void;
+
+    defaultOptions(): Record<string, unknown>;
 }
 
 export class TransformerFactory {

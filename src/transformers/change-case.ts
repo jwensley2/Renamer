@@ -51,4 +51,8 @@ export class ChangeCase implements Transformer {
                 break;
         }
     }
+
+    defaultOptions(): Record<string, unknown> {
+        return this.defaults;
+    }
 }

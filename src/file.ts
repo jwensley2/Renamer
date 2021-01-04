@@ -5,8 +5,8 @@ import fs from 'fs';
 import {v4 as uuidv4} from 'uuid';
 
 export enum Part {
-    Name,
-    Extension
+    Name = 'Name',
+    Extension = 'Extension'
 }
 
 export default class SelectedFile {

@@ -1,9 +1,19 @@
 <template>
     <div
-        class="h-full flex flex-col justify-items-stretch"
-        @drop="handleDrop($event)"
+        :class="{'drop-zone': draggingOver}"
+        class="h-full flex flex-col justify-items-stretch relative"
+        @drop="handleDrop($event); draggingOver = false"
         @dragover.prevent
+        @dragenter.prevent="draggingOver = true"
+        @dragleave.prevent="draggingOver = false"
     >
+        <div
+            v-if="draggingOver"
+            class="flex justify-center items-center bg-gray-300 top-0 bottom-0 left-0 right-0 absolute"
+        >
+            <div class="text-2xl">Drop Files Here</div>
+        </div>
+
         <div class="flex justify-between">
             <div>
                 <button
@@ -15,7 +25,7 @@
 
                 <button
                     v-if="files.length > 0"
-                    class="btn btn-primary ml-3"
+                    class="btn bg-green-600 hover:bg-green-500 font-semibold text-white ml-3"
                     @click="renameFiles"
                 >
                     <svg class="h-6 w-6 -mt-1 text-white inline-block" fill="currentColor" viewBox="0 0 20 20"
@@ -63,7 +73,10 @@
                     </tr>
                 </template>
                 <tr v-else>
-                    <td class="text-center" colspan="3">No files selected</td>
+                    <td class="text-center font-semibold py-5" colspan="3">
+                        <p class="mb-2">No Files Selected</p>
+                        <p>Click "Select Files" or Drag Files Into This Area</p>
+                    </td>
                 </tr>
                 </tbody>
                 <tfoot class="border-b bg-gray-100">
@@ -80,7 +93,7 @@
 </template>
 
 <script lang="ts">
-import {computed, defineComponent} from 'vue';
+import {computed, defineComponent, ref} from 'vue';
 import {useStore} from '@/store';
 import {ipcRenderer, IpcRendererEvent, OpenDialogReturnValue} from 'electron';
 import SelectedFile from '@/file';
@@ -90,10 +103,12 @@ export default defineComponent({
     setup() {
         const store = useStore();
         const files = computed(() => store.getters.files);
+        const draggingOver = ref(false);
 
         return {
             files: files,
             hasErrors: computed(() => files.value.filter((file: SelectedFile) => file.error).length > 0),
+            draggingOver: draggingOver,
             selectFiles: () => {
                 ipcRenderer.send('select-files');
 
@@ -120,7 +135,7 @@ export default defineComponent({
                         if (file) store.commit('addFileFromPath', file.path);
                     }
                 });
-            },
+            }
         };
     },
 });
@@ -131,5 +146,9 @@ export default defineComponent({
     margin: 0;
     padding: 0;
     list-style: none;
+}
+
+.drop-zone * {
+    pointer-events: none
 }
 </style>
