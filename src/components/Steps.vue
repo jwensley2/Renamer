@@ -19,7 +19,7 @@
                 <button class="mr-5 flex-1 text-left step-name" @click="$.emit('edit-step', step)">
                     {{ step.label }} <span class="edit invisible text-sm text-gray-500">edit</span>
                 </button>
-                <input v-model="step.active" class="self-center" type="checkbox">
+                <input v-model="step.active" class="self-center" type="checkbox" @change="changeStepActive(step)">
             </li>
         </ol>
 
@@ -50,6 +50,9 @@ export default defineComponent({
 
                 store.commit('addStep', step);
                 emit('edit-step', step);
+            },
+            changeStepActive: () => {
+                store.commit('savePresets');
             },
             startDrag: (evt: DragEvent, step: Step) => {
                 if (!evt.dataTransfer) return;

@@ -87,7 +87,7 @@ export const store = createStore<State>({
         /**
          * Delete a preset
          * @param state
-         * @param step
+         * @param preset
          */
         deletePreset(state: State, preset: Preset) {
             const index = _.findIndex(state.presets, {id: preset.id});
@@ -96,10 +96,23 @@ export const store = createStore<State>({
             config.set('presets', state.presets);
         },
 
+        /**
+         * Set the currently selected preset
+         * @param state
+         * @param preset
+         */
         setSelectedPreset(state: State, preset: Preset) {
             state.selectedPreset = preset;
 
             config.set('selectedPreset', preset.id);
+        },
+
+        /**
+         * Save the presets to the config file
+         * @param state
+         */
+        savePresets(state: State) {
+            config.set('presets', state.presets);
         },
 
         /**

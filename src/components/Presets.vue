@@ -1,14 +1,19 @@
 <template>
     <div>
-        <h2>Preset</h2>
+        <h2 class="text-lg font-semibold">Preset</h2>
 
-        <div class="flex justify-between center items-stretch">
-            <select v-model="selectedPreset" class="text-input">
-                <option v-for="preset in presets" :key="preset.id" :value="preset">{{ preset.name }}</option>
-            </select>
-            <button class="btn btn-sm btn-primary px-2 py-1 ml-1 mb-0" @click.prevent="addPreset">+</button>
-            <button v-if="selectedPreset" class="btn btn-sm btn-primary px-2 py-1 ml-1 mb-0"
-                    @click.prevent="$emit('edit-preset', selectedPreset)">E
+        <select v-model="selectedPreset" class="text-input">
+            <option v-for="preset in presets" :key="preset.id" :value="preset">{{ preset.name }}</option>
+        </select>
+
+        <div class="flex justify-items-stretch mt-1">
+            <button class="preset-buttons" @click.prevent="addPreset">Add Preset</button>
+            <button
+                v-if="selectedPreset"
+                class="preset-buttons ml-2"
+                @click.prevent="$emit('edit-preset', selectedPreset)"
+            >
+                Edit Preset
             </button>
         </div>
     </div>
@@ -48,5 +53,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
+.preset-buttons {
+    @apply w-full bg-blue-500 hover:bg-blue-400 text-white text-xs px-2 py-0.5;
+}
 </style>

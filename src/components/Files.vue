@@ -1,5 +1,9 @@
 <template>
-    <div class="h-full" @drop="handleDrop($event)" @dragover.prevent>
+    <div
+        class="h-full flex flex-col justify-items-stretch"
+        @drop="handleDrop($event)"
+        @dragover.prevent
+    >
         <div class="flex justify-between">
             <div>
                 <button
@@ -47,7 +51,9 @@
                 </thead>
                 <tbody>
                 <template v-if="files.length > 0">
-                    <tr v-for="file in files" :key="file.id"
+                    <tr
+                        v-for="file in files"
+                        :key="file.id"
                         :class="{'text-gray-400': file.name === file.renamedName, 'text-red-500': file.error}"
                         class="border-b whitespace-nowrap">
                         <td class="px-2 py-0.5">{{ file.name }}{{ file.ext }}</td>
@@ -60,6 +66,14 @@
                     <td class="text-center" colspan="3">No files selected</td>
                 </tr>
                 </tbody>
+                <tfoot class="border-b bg-gray-100">
+                <tr>
+                    <td class="px-2 py-1">Current Name</td>
+                    <td class="px-2 py-1">New Name</td>
+                    <td class="px-2 py-1">Directory</td>
+                    <td v-if="hasErrors" class="px-2 py-1">Error</td>
+                </tr>
+                </tfoot>
             </table>
         </div>
     </div>
