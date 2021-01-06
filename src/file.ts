@@ -101,6 +101,11 @@ export default class SelectedFile {
             return;
         }
 
+        if (fs.existsSync(this.renamedPath)) {
+            this.error = 'Renamed file already exists';
+            return;
+        }
+
         try {
             fs.renameSync(this.path, this.renamedPath);
         } catch (e) {

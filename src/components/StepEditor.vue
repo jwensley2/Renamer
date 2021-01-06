@@ -55,6 +55,9 @@
                 >
             </div>
         </template>
+        <template v-else-if="step.transformer === TransformerType.Rename">
+            <rename-options v-model="step.options"></rename-options>
+        </template>
 
         <div class="flex flex-1 justify-between mt-10">
             <button
@@ -82,14 +85,15 @@ import {label as transformerLabel, TransformerType} from '@/transformers/transfo
 import {computed, defineComponent, reactive} from 'vue';
 import _ from 'lodash';
 import {Case, caseLabel} from '@/transformers/change-case';
-import ReplaceListOptions from '@/components/ReplaceListOptions.vue';
-import ReplaceOptions from '@/components/ReplaceOptions.vue';
 import {Part} from '@/file';
 import Step from '@/step';
+import ReplaceListOptions from '@/components/ReplaceListOptions.vue';
+import ReplaceOptions from '@/components/ReplaceOptions.vue';
+import RenameOptions from '@/components/RenameOptions.vue';
 
 export default defineComponent({
     name: 'StepEditor',
-    components: {ReplaceOptions, ReplaceListOptions},
+    components: {RenameOptions, ReplaceOptions, ReplaceListOptions},
     props: {
         modelValue: null,
     },

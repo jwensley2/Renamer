@@ -3,12 +3,14 @@ import {Options as ReplaceOptions, Replace} from '@/transformers/replace';
 import {ChangeCase, Options as ChangeCaseOptions} from '@/transformers/change-case';
 import {Options as ReplaceListOptions, ReplaceList} from '@/transformers/replace-list';
 import {Options as TrimOptions, Trim} from '@/transformers/trim';
+import {Options as RenameOptions, Rename} from '@/transformers/rename';
 
 export enum TransformerType {
     ChangeCase = 'ChangeCase',
     Replace = 'Replace',
     ReplaceList = 'ReplaceList',
     Trim = 'Trim',
+    Rename = 'Rename',
 }
 
 export function label(transformation: TransformerType): string {
@@ -23,7 +25,7 @@ export function label(transformation: TransformerType): string {
             return 'Trim';
     }
 
-    throw new Error('Label not defined for transformation ' + transformation);
+    return transformation;
 }
 
 export interface Transformer {
@@ -43,6 +45,8 @@ export class TransformerFactory {
                 return new ReplaceList(options as ReplaceListOptions);
             case TransformerType.Trim:
                 return new Trim(options as TrimOptions);
+            case TransformerType.Rename:
+                return new Rename(options as RenameOptions);
         }
 
         throw new Error('Unknown transformation type');

@@ -19,7 +19,7 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import {computed, defineComponent} from 'vue';
 import Preset from '@/preset.ts';
 import {useStore} from '@/store.ts';
@@ -38,7 +38,7 @@ export default defineComponent({
                 set: (preset) => {
                     emit('preset-changed', preset);
                     store.commit('setSelectedPreset', preset);
-                }
+                },
             }),
 
             addPreset: () => {
@@ -48,8 +48,8 @@ export default defineComponent({
                 emit('edit-preset', preset);
             },
         };
-    }
-})
+    },
+});
 </script>
 
 <style scoped>

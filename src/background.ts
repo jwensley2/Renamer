@@ -1,8 +1,10 @@
 'use strict';
+/* global __static */
 
-import {app, protocol, BrowserWindow, ipcMain, dialog} from 'electron';
+import {app, BrowserWindow, dialog, ipcMain, protocol} from 'electron';
 import {createProtocol} from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, {VUEJS_DEVTOOLS} from 'electron-devtools-installer';
+import path from 'path';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -23,6 +25,7 @@ async function createWindow() {
             nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
             enableRemoteModule: true,
         },
+        icon: path.join(__static, 'icon.png'),
     });
 
     if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -81,7 +84,7 @@ if (isDevelopment) {
     }
 }
 
-ipcMain.on('select-files', (event, arg) => {
+ipcMain.on('select-files', (event) => {
     dialog.showOpenDialog({properties: ['openFile', 'multiSelections']}).then((result) => {
         event.reply('files-selected', result);
     });
