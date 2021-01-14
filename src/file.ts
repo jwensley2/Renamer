@@ -3,6 +3,7 @@ import _ from 'lodash';
 import path from 'path';
 import fs from 'fs';
 import {v4 as uuidv4} from 'uuid';
+import process from 'process';
 
 export enum Part {
     Name = 'Name',
@@ -90,19 +91,48 @@ export default class SelectedFile {
         }
     }
 
+    /**
+     * Check if the file can be renamed. If it exists and there are no conflicts, permission issues, etc.
+     */
+    public canRename(): [boolean, string | null] {
+        if (!fs.existsSync(this.path)) {
+            return [false, 'File does not exist'];
+        }
+
+        if (fs.existsSync(this.renamedPath)) {
+            // Windows is case insensitive, so we can rename if only the case is changing
+            if ((process.platform === 'win32') && this.path.toLowerCase() === this.renamedPath.toLowerCase()) {
+                return [true, null];
+            }
+
+            return [false, 'Renamed file already exists'];
+        }
+
+        try {
+            fs.accessSync(this.path, fs.constants.W_OK);
+        } catch (error) {
+            return [false, 'Cannot write original path'];
+        }
+
+        try {
+            fs.accessSync(this.renamedDir, fs.constants.W_OK);
+        } catch (error) {
+            return [false, 'Cannot write to new path'];
+        }
+
+        return [true, null];
+    }
+
     public rename(): void {
         this.error = null;
 
         // Skip files that haven't changed
         if (this.path === this.renamedPath) return;
 
-        if (!fs.existsSync(this.path)) {
-            this.error = 'File does not exist';
-            return;
-        }
+        const [canRename, error] = this.canRename();
 
-        if (fs.existsSync(this.renamedPath)) {
-            this.error = 'Renamed file already exists';
+        if (!canRename) {
+            this.error = error;
             return;
         }
 
