@@ -1,7 +1,7 @@
 <template>
     <div
         :class="{'drop-zone': draggingOver}"
-        class="h-full flex flex-col justify-items-stretch relative"
+        class="h-full flex flex-col flex-grow-0 justify-items-stretch relative"
         @drop="handleDrop($event); draggingOver = false"
         @dragover.prevent
         @dragenter.prevent="draggingOver = true"
@@ -100,9 +100,15 @@ import SelectedFile from '@/file';
 import _ from 'lodash';
 
 export default defineComponent({
-    setup() {
+    name: 'Files',
+    props: {
+        presetId: String,
+    },
+    setup(props) {
         const store = useStore();
-        const files = computed(() => store.getters.files);
+        const files = computed(() => {
+            return store.getters.files.map((file: SelectedFile) => file.transform(store.getters.getSteps(props.presetId, true)));
+        });
         const draggingOver = ref(false);
 
         return {
@@ -122,7 +128,7 @@ export default defineComponent({
                 store.commit('clearFiles');
             },
             renameFiles: () => {
-                store.state.files.forEach((file) => {
+                files.value.forEach((file: SelectedFile) => {
                     file.rename();
                 });
             },
@@ -135,7 +141,7 @@ export default defineComponent({
                         if (file) store.commit('addFileFromPath', file.path);
                     }
                 });
-            }
+            },
         };
     },
 });

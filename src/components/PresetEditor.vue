@@ -36,31 +36,33 @@
 <script lang="ts">
 import {defineComponent, reactive} from 'vue';
 import _ from 'lodash';
+import {useStore} from '@/store';
+import {useRouter} from 'vue-router';
 
 export default defineComponent({
     name: 'PresetEditor',
     props: {
-        modelValue: null,
+        presetId: String,
     },
-    emits: [
-        'update:modelValue',
-        'close',
-        'delete',
-    ],
     setup(props, {emit}) {
-        const preset = reactive(_.cloneDeep(props.modelValue));
+        const router = useRouter();
+        const store = useStore();
+        const preset = reactive(_.cloneDeep(store.getters.getPreset(props.presetId)));
 
         return {
             preset: preset,
             save: () => {
-                emit('update:modelValue', preset);
-                emit('close');
+                store.commit('updatePreset', preset);
+                router.push({name: 'files', params: {presetId: preset.id}});
             },
+
             close: () => {
-                emit('close');
+                router.push({name: 'files', params: {presetId: preset.id}});
             },
+
             deleteStep: () => {
-                emit('delete', preset);
+                store.commit('deletePreset', preset);
+                router.push('/');
             },
         };
     },

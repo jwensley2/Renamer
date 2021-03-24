@@ -82,28 +82,35 @@
 
 <script lang="ts">
 import {label as transformerLabel, TransformerType} from '@/transformers/transformer';
-import {computed, defineComponent, reactive} from 'vue';
+import {computed, defineComponent, reactive, ref} from 'vue';
 import _ from 'lodash';
 import {Case, caseLabel} from '@/transformers/change-case';
 import {Part} from '@/file';
-import Step from '@/step';
 import ReplaceListOptions from '@/components/ReplaceListOptions.vue';
 import ReplaceOptions from '@/components/ReplaceOptions.vue';
 import RenameOptions from '@/components/RenameOptions.vue';
+import {onBeforeRouteUpdate, useRouter} from 'vue-router';
+import {useStore} from '@/store';
+import Preset from '@/preset';
 
 export default defineComponent({
     name: 'StepEditor',
     components: {RenameOptions, ReplaceOptions, ReplaceListOptions},
     props: {
-        modelValue: null,
+        presetId: String,
+        stepId: String,
     },
-    emits: [
-        'update:modelValue',
-        'close',
-        'delete',
-    ],
     setup(props, {emit}): Record<string, unknown> {
-        const step = reactive(_.cloneDeep(props.modelValue)) as Step;
+        const router = useRouter();
+        const store = useStore();
+        let preset: Preset = store.getters.getPreset(props.presetId);
+        let step = ref(reactive(_.cloneDeep(store.getters.getStep(props.stepId))));
+
+        onBeforeRouteUpdate(async (to, from) => {
+            if (to.params.stepId !== from.params.stepId) {
+                step.value = reactive(_.cloneDeep(store.getters.getStep(to.params.stepId)));
+            }
+        });
 
         return {
             step: step,
@@ -115,17 +122,18 @@ export default defineComponent({
             }),
             caseLabel: caseLabel,
             save: () => {
-                emit('update:modelValue', step);
-                emit('close');
+                store.commit('updateStep', step.value);
+                router.push({name: 'files', params: {presetId: preset.id}});
             },
             close: () => {
-                emit('close');
+                router.push({name: 'files', params: {presetId: preset.id}});
             },
             deleteStep: () => {
-                emit('delete', step);
+                store.commit('deleteStep', step.value);
+                router.push({name: 'files', params: {presetId: preset.id}});
             },
             transformerChanged: () => {
-                step.options = step.mergeOptionsWithDefaults(step.options);
+                step.value.options = step.value.mergeOptionsWithDefaults(step.value.options);
             },
         };
     },

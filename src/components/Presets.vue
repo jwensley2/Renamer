@@ -3,7 +3,7 @@
         <h2 class="text-lg font-semibold">Preset</h2>
 
         <select v-model="selectedPreset" class="text-input">
-            <option v-for="preset in presets" :key="preset.id" :value="preset">{{ preset.name }}</option>
+            <option v-for="preset in presets" :key="preset.id" :value="preset.id">{{ preset.name }}</option>
         </select>
 
         <div class="flex justify-items-stretch mt-1">
@@ -11,7 +11,7 @@
             <button
                 v-if="selectedPreset"
                 class="preset-buttons ml-2"
-                @click.prevent="$emit('edit-preset', selectedPreset)"
+                @click.prevent="$router.push({name: 'edit', params: {presetId: selectedPreset}})"
             >
                 Edit Preset
             </button>
@@ -21,23 +21,28 @@
 
 <script lang="ts">
 import {computed, defineComponent} from 'vue';
-import Preset from '@/preset.ts';
-import {useStore} from '@/store.ts';
+import Preset from '@/preset';
+import {useStore} from '@/store';
+import {useRouter} from 'vue-router';
 
 export default defineComponent({
     name: 'Presets',
+    props: {
+        presetId: String,
+    },
     setup(props, {emit}) {
         const store = useStore();
+        const router = useRouter();
 
         return {
             presets: computed(() => store.state.presets),
             selectedPreset: computed({
                 get: () => {
-                    return store.getters.selectedPreset;
+                    return store.getters.getPreset(props.presetId).id;
                 },
-                set: (preset) => {
-                    emit('preset-changed', preset);
-                    store.commit('setSelectedPreset', preset);
+                set: (presetId) => {
+                    store.commit('setSelectedPreset', presetId);
+                    router.push({name: 'files', params: {presetId: presetId}});
                 },
             }),
 
@@ -45,7 +50,7 @@ export default defineComponent({
                 const preset = new Preset('');
 
                 store.commit('addPreset', preset);
-                emit('edit-preset', preset);
+                router.push({name: 'edit', params: {presetId: preset.id}});
             },
         };
     },

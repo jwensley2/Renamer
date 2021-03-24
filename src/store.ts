@@ -1,19 +1,16 @@
 import {InjectionKey} from 'vue';
 import {createStore, Store, useStore as baseUseStore} from 'vuex';
-import Step from './step';
-import {TransformerType} from '@/transformers/transformer';
-import {Case} from '@/transformers/change-case';
+import Step, {StepConfig} from './step';
 import SelectedFile from '@/file';
 import _ from 'lodash';
-import Config from 'electron-store';
-import Preset from '@/preset';
-
-const config = new Config();
+import config from '@/config';
+import Preset, {PresetConfig} from '@/preset';
 
 // Typings for the store state
 export interface State {
-    selectedPreset: Preset,
-    presets: Preset[],
+    selectedPreset?: string,
+    presets: Array<PresetConfig>,
+    steps: Array<StepConfig>,
     files: SelectedFile[],
 }
 
@@ -22,38 +19,10 @@ export const key: InjectionKey<Store<State>> = Symbol();
 
 export const store = createStore<State>({
     state(): State {
-        const defaultPresets = [
-            new Preset('Default', [
-                new Step('Change to Lowercase', TransformerType.ChangeCase),
-                new Step('Replace Underscores', TransformerType.Replace, {search: '_', replace: ' '}),
-                new Step('Replace Dashes', TransformerType.Replace, {search: '-+(\s*)-+', replace: '-'}),
-                new Step('Replace List', TransformerType.ReplaceList, {
-                    replacements: [
-                        {
-                            search: /plane/.source,
-                            replace: 'train',
-                            regex: true,
-                            caseInsensitive: true,
-                        },
-                        {
-                            search: /snakes/.source,
-                            replace: 'rakes',
-                            regex: true,
-                            caseInsensitive: true,
-                        },
-                    ],
-                }),
-                new Step('Change to Titlecase', TransformerType.ChangeCase, {case: Case.TitleCase}),
-            ]),
-        ];
-
-        const presets: Preset[] = config.has('presets') ? (config.get('presets') as Array<Record<string, unknown>>).map((step) => {
-            return Preset.fromJSON(step);
-        }) : defaultPresets;
-
         return {
-            selectedPreset: config.has('selectedPreset') ? _.find(presets, {id: config.get('selectedPreset') as string}) || presets[0] : presets[0],
-            presets: presets,
+            selectedPreset: config.get('selectedPreset') as string,
+            presets: config.get('presets') as Array<PresetConfig> ?? [],
+            steps: config.get('steps') as Array<StepConfig> ?? [],
             files: [],
         };
     },
@@ -65,7 +34,7 @@ export const store = createStore<State>({
          * @param preset
          */
         addPreset(state: State, preset: Preset) {
-            state.presets.push(preset);
+            state.presets.push(preset.toJSON());
         },
 
         /**
@@ -75,11 +44,7 @@ export const store = createStore<State>({
          */
         updatePreset(state: State, preset: Preset) {
             const index = _.findIndex(state.presets, {id: preset.id});
-            state.presets.splice(index, 1, preset);
-
-            if (state.selectedPreset.id === preset.id) {
-                state.selectedPreset = preset;
-            }
+            state.presets.splice(index, 1, preset.toJSON());
 
             config.set('presets', state.presets);
         },
@@ -99,12 +64,11 @@ export const store = createStore<State>({
         /**
          * Set the currently selected preset
          * @param state
-         * @param preset
+         * @param {string} id
          */
-        setSelectedPreset(state: State, preset: Preset) {
-            state.selectedPreset = preset;
-
-            config.set('selectedPreset', preset.id);
+        setSelectedPreset(state: State, id: string) {
+            state.selectedPreset = id;
+            config.set('selectedPreset', id);
         },
 
         /**
@@ -121,19 +85,20 @@ export const store = createStore<State>({
          * @param step
          */
         addStep(state: State, step: Step) {
-            state.selectedPreset.steps.push(step);
+            state.steps.push(step);
+            config.set('steps', state.steps);
         },
 
         /**
          * Update an existing step
          * @param state
-         * @param step
+         * @param payload
          */
         updateStep(state: State, step: Step) {
-            const index = _.findIndex(state.selectedPreset.steps, {id: step.id});
-            state.selectedPreset.steps.splice(index, 1, step);
+            const index = _.findIndex(state.steps, {id: step.id});
+            state.steps.splice(index, 1, step);
 
-            config.set('presets', state.presets);
+            config.set('steps', state.steps);
         },
 
         /**
@@ -142,25 +107,26 @@ export const store = createStore<State>({
          * @param step
          */
         deleteStep(state: State, step: Step) {
-            const index = _.findIndex(state.selectedPreset.steps, {id: step.id});
-            state.selectedPreset.steps.splice(index, 1);
+            const index = _.findIndex(state.steps, {id: step.id});
+            state.steps.splice(index, 1);
 
+            config.set('steps', state.steps);
             config.set('presets', state.presets);
         },
 
         /**
-         * Move a step to a new position in the steps
+         * Set the active state for a step
          * @param state
          * @param payload
          */
-        moveStep(state: State, payload: { oldIndex: number, newIndex: number }) {
-            const {oldIndex, newIndex} = payload;
-            const steps = state.selectedPreset.steps;
+        setStepActive(state: State, payload: { id: string, active: boolean }) {
+            const {id, active} = payload;
+            const step = _.find(state.steps, {id: id});
 
-            // Splice the step out of it's previous position and into the new position
-            steps.splice(newIndex, 0, ...steps.splice(oldIndex, 1));
-
-            config.set('presets', state.presets);
+            if (step) {
+                step.active = active;
+                config.set('steps', state.steps);
+            }
         },
 
         /**
@@ -184,22 +150,108 @@ export const store = createStore<State>({
     },
 
     getters: {
-        selectedPreset(state: State) {
-            return state.selectedPreset;
-        },
-
-        steps(state: State) {
-            return state.selectedPreset.steps;
-        },
-
-        activeSteps(state: State) {
-            return state.selectedPreset.steps.filter((step) => {
-                return step.active;
+        /**
+         * Get a preset by id
+         * @param state
+         * @param getters
+         */
+        getPreset: (state: State, getters) => (id: string): Preset | undefined => {
+            const presetConfig = _.find(state.presets, {
+                id: id,
             });
+
+            if (!presetConfig) return;
+
+            const preset = Preset.fromJSON(presetConfig);
+
+            preset.steps = presetConfig.steps.map((step) => {
+                return getters.getStep(step);
+            }).filter((step: Step | undefined) => {
+                return typeof step !== 'undefined';
+            });
+
+            return preset;
         },
 
-        files(state: State, getters) {
-            return state.files.map((file) => file.transform(getters.activeSteps));
+        /**
+         * Get a step for a preset by id
+         * @param state
+         */
+        getStep: (state: State) => (id: string): Step | undefined => {
+            const stepConfig = _.find(state.steps, {
+                id: id,
+            });
+
+            if (!stepConfig) return;
+
+            return Step.fromJSON(stepConfig);
+        },
+
+        selectedPreset(state: State, getters): Preset {
+            return getters.getPreset(state.selectedPreset);
+        },
+
+        /**
+         * Get the steps for a preset
+         * @param state
+         * @param getters
+         */
+        getSteps: (state: State, getters) => (preset: string, active?: true): Step[] => {
+            if (active === true) {
+                return getters.getPreset(preset).steps.filter((step: Step) => step.active);
+            }
+
+            return getters.getPreset(preset).steps;
+        },
+
+        /**
+         * Get the selected files
+         * @param state
+         */
+        files(state: State): SelectedFile[] {
+            return state.files;
+        },
+    },
+
+    actions: {
+        /**
+         * Move a step to a new position in the steps
+         */
+        addStepForPreset({commit}, payload: { preset: Preset, step: Step }) {
+            const {preset, step} = payload;
+
+            preset.steps.push(step);
+
+            commit('addStep', step);
+            commit('updatePreset', preset);
+        },
+
+        /**
+         * Move a step to a new position in a presets steps
+         */
+        moveStep({commit}, payload: { preset: Preset, oldIndex: number, newIndex: number }) {
+            const {preset, oldIndex, newIndex} = payload;
+            const steps = preset.steps;
+
+            // Splice the step out of its previous position and into the new position
+            steps.splice(newIndex, 0, ...steps.splice(oldIndex, 1));
+
+            commit('updatePreset', preset);
+        },
+
+        /**
+         * Prune any steps that are not currently used in a preset
+         * @param state
+         */
+        pruneSteps({state}) {
+            const usedStepIds: Array<string> = [];
+
+            state.presets.forEach((preset) => {
+                usedStepIds.push(...preset.steps);
+            });
+
+            state.steps = state.steps.filter((step) => usedStepIds.indexOf(step.id) !== -1);
+            config.set('steps', state.steps);
         },
     },
 });
