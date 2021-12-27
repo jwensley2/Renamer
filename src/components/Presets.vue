@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div id="presets-sidebar">
         <h2 class="text-lg font-semibold">Preset</h2>
 
         <select v-model="selectedPreset" class="text-input">
@@ -58,6 +58,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
+#presets-sidebar {
+    min-width : 200px;
+}
+
 .preset-buttons {
     @apply w-full bg-blue-500 hover:bg-blue-400 text-white text-xs px-2 py-0.5;
 }

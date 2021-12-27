@@ -1,78 +1,80 @@
 <template>
-    <form>
-        <h1 class="text-2xl">Edit Step</h1>
-
-        <div class="my-2">
-            <label>Type</label>
-            <select v-model="step.transformer" class="text-input" @change="transformerChanged">
-                <option v-for="type in TransformerType" :key="type" :value="type">{{ transformerLabel(type) }}</option>
-            </select>
-        </div>
-
-        <div class="my-2">
-            <label for="step-label">Step Name</label>
-            <input
-                id="step-label"
-                v-model="step.label"
-                class="text-input"
-                type="text"
-            >
-        </div>
-
-        <template v-if="step.transformer === TransformerType.ChangeCase">
-            <div class="my-2">
-                <label>
-                    Part
-                    <select v-model="step.options.part" class="text-input">
-                        <option v-for="part in Part" :key="part" :value="part">{{ part }}</option>
-                    </select>
-                </label>
-            </div>
+    <form class="flex flex-col max-h-full">
+        <div class="overflow-y-auto pr-3">
+            <h1 class="text-2xl">Edit Step</h1>
 
             <div class="my-2">
-                <label>
-                    Change Case To
-                    <select v-model="step.options.case" class="text-input">
-                        <option v-for="textCase in Case" :key="textCase" :value="textCase">{{ caseLabel(textCase) }}</option>
-                    </select>
-                </label>
-            </div>
-        </template>
-        <template v-else-if="step.transformer === TransformerType.Replace">
-            <replace-options v-model="step.options"></replace-options>
-        </template>
-        <template v-else-if="step.transformer === TransformerType.ReplaceList">
-            <replace-list-options v-model="step.options"></replace-list-options>
-        </template>
-        <template v-else-if="step.transformer === TransformerType.Trim">
-            <div class="my-2">
-                <label for="trim-characters">Characters</label>
+                <label for="step-label">Step Name</label>
                 <input
-                    id="trim-characters"
-                    v-model="step.options.characters"
+                    id="step-label"
+                    v-model="step.label"
                     class="text-input"
                     type="text"
                 >
             </div>
-        </template>
-        <template v-else-if="step.transformer === TransformerType.Rename">
-            <rename-options v-model="step.options"></rename-options>
-        </template>
 
-        <div class="flex flex-1 justify-between mt-10">
+            <div class="my-2">
+                <label>Type</label>
+                <select v-model="step.transformer" class="text-input" @change="transformerChanged">
+                    <option v-for="type in TransformerType" :key="type" :value="type">{{ transformerLabel(type) }}</option>
+                </select>
+            </div>
+
+            <template v-if="step.transformer === TransformerType.ChangeCase">
+                <div class="my-2">
+                    <label>
+                        Part
+                        <select v-model="step.options.part" class="text-input">
+                            <option v-for="part in Part" :key="part" :value="part">{{ part }}</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="my-2">
+                    <label>
+                        Change Case To
+                        <select v-model="step.options.case" class="text-input">
+                            <option v-for="textCase in Case" :key="textCase" :value="textCase">{{ caseLabel(textCase) }}</option>
+                        </select>
+                    </label>
+                </div>
+            </template>
+            <template v-else-if="step.transformer === TransformerType.Replace">
+                <replace-options v-model="step.options" :key="step.id"></replace-options>
+            </template>
+            <template v-else-if="step.transformer === TransformerType.ReplaceList">
+                <replace-list-options v-model="step.options" :key="step.id"></replace-list-options>
+            </template>
+            <template v-else-if="step.transformer === TransformerType.Trim">
+                <div class="my-2">
+                    <label for="trim-characters">Characters</label>
+                    <input
+                        id="trim-characters"
+                        v-model="step.options.characters"
+                        class="text-input"
+                        type="text"
+                    >
+                </div>
+            </template>
+            <template v-else-if="step.transformer === TransformerType.Rename">
+                <rename-options v-model="step.options" :key="step.id"></rename-options>
+            </template>
+        </div>
+
+        <div class="flex flex-1 justify-between pt-3 border-t">
             <button
-                class="btn btn-primary w-full mr-3"
+                class="btn-sm btn-primary w-full mr-3"
                 @click.prevent="save"
             >Save
             </button>
             <button
-                class="btn btn-warning w-full mr-3"
+                class="btn-sm btn-warning w-full mr-3"
                 @click.prevent="close"
             >Cancel
             </button>
 
             <button
-                class="btn btn-danger w-full"
+                class="btn-sm btn-danger w-full"
                 @click.prevent="deleteStep"
             >Delete Step
             </button>

@@ -1,7 +1,8 @@
 import {Transformer} from '@/transformers/transformer';
 import SelectedFile, {Part} from '@/file';
 
-type Replacement = {
+export type Replacement = {
+    id: string,
     search: string,
     replace: string,
     regex: boolean,
@@ -46,7 +47,7 @@ export class ReplaceList implements Transformer {
         });
     }
 
-    defaultOptions(): Record<string, unknown> {
+    defaultOptions(): Options {
         return this.defaults;
     }
 }

@@ -1,52 +1,24 @@
 <template>
     <div>
-        <h2 class="text-lg mt-4">Replacements</h2>
+        <div class="flex items-baseline mt-4">
+            <h2 class="text-lg font-semibold flex-1">Replacements</h2>
+
+            <div class="text-sm text-right">
+                Search: <input type="text" v-model="filter" class="text-input w-auto inline-block">
+            </div>
+        </div>
 
         <div>
+            <div v-if="replacements.length === 0" class="px-2 py-2 my-3 bg-gray-200 text-sm">
+                No replacements match your search.
+            </div>
+
             <div
-                v-for="(replacement, index) in options.replacements"
-                :key="index"
-                class="flex flex-1 items-center pt-2 pb-3 border-t first:border-t-0"
+                v-for="(replacement, index) in replacements"
+                :key="replacement.id"
+                class="border-t first:border-t-0"
             >
-                <div class="mr-2 flex-grow">
-                    <label :for="`step-search-${index}`" class="hidden">Search</label>
-                    <input
-                        :id="`step-search-${index}`"
-                        v-model="replacement.search"
-                        class="text-input"
-                        placeholder="Search For"
-                        type="text"
-                    >
-                </div>
-
-                <div class="mr-2 flex-grow">
-                    <label :for="`step-replace-${index}`" class="hidden">Replace</label>
-                    <input
-                        :id="`step-replace-${index}`"
-                        v-model="replacement.replace"
-                        class="text-input"
-                        placeholder="Replace With"
-                        type="text"
-                    >
-                </div>
-
-                <div class="mr-2 whitespace-nowrap items-center text-sm" style="min-width: 150px">
-                    <div class="mt-0">
-                        <label><input v-model="replacement.regex" class="mr-1" type="checkbox"> Regex</label>
-                    </div>
-
-                    <div v-if="replacement.regex">
-                        <label><input v-model="replacement.caseInsensitive" class="mr-1" type="checkbox"> Case Insensitive</label>
-                    </div>
-                </div>
-
-                <div class="pr-2">
-                    <button class="text-red-500 text-lg w-4 h-4" @click.prevent="deleteReplacement(index)">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
+                <replacement v-model="replacements[index]" @delete="deleteReplacement(replacement)" :key="replacement.id"></replacement>
             </div>
         </div>
 
@@ -55,31 +27,61 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, reactive, watch} from 'vue';
+import {computed, defineComponent, reactive, Ref, ref, watch} from 'vue';
 import _ from 'lodash';
+import {Options as ReplaceOptions, Replacement} from '@/transformers/replace-list';
+import {default as ReplacementComponent} from '@/components/Replacement.vue';
+import {v4 as uuidv4} from 'uuid';
 
 export default defineComponent({
     name: 'ReplaceListOptions',
+    components: {
+        Replacement: ReplacementComponent,
+    },
     props: {
         modelValue: null,
     },
     setup(props, {emit}) {
-        const options = reactive(_.cloneDeep(props.modelValue));
+        const options: ReplaceOptions = reactive(_.cloneDeep(props.modelValue));
+        const newReplacementIds: string[] = [];
+        const filter = ref('');
 
-        watch(options, (newValue) => {
+        watch(options, (newValue: ReplaceOptions) => {
             emit('update:modelValue', newValue);
         }, {deep: true});
 
         return {
+            filter: filter,
             options: options,
-            addReplacement: () => {
-                if (!options.replacements) {
-                    options.replacements = [];
-                }
+            replacements: computed(() => {
+                return options.replacements.filter((replacement: Replacement) => {
+                    const search = filter.value.toLowerCase();
 
-                options.replacements.push({});
+                    // Don't filter if search is empty
+                    if (search === '') return true;
+
+                    // Always show newly created replacements
+                    if (newReplacementIds.includes(replacement.id)) return true;
+
+                    return (replacement.search && replacement.search.toLowerCase().includes(search)) ||
+                        (replacement.replace && replacement.replace.toLowerCase().includes(search));
+                });
+            }),
+            addReplacement: () => {
+                const replacement = {
+                    id: uuidv4(),
+                    search: '',
+                    replace: '',
+                    regex: false,
+                    caseInsensitive: false,
+                };
+
+                options.replacements.push(replacement);
+                newReplacementIds.push(replacement.id);
             },
-            deleteReplacement: (index: number) => {
+
+            deleteReplacement: (replacement: Replacement) => {
+                const index = _.findIndex(options.replacements, {id: replacement.id});
                 options.replacements.splice(index, 1);
             },
         };

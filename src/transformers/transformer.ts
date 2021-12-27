@@ -13,6 +13,8 @@ export enum TransformerType {
     Rename = 'Rename',
 }
 
+export type TransformerOptions = Record<string, unknown>;
+
 export function label(transformation: TransformerType): string {
     switch (transformation) {
         case TransformerType.Replace:
@@ -31,11 +33,11 @@ export function label(transformation: TransformerType): string {
 export interface Transformer {
     transform(file: SelectedFile): void;
 
-    defaultOptions(): Record<string, unknown>;
+    defaultOptions(): TransformerOptions;
 }
 
 export class TransformerFactory {
-    static makeTransformer(type: TransformerType, options: Record<string, unknown>): Transformer {
+    static makeTransformer(type: TransformerType, options: TransformerOptions): Transformer {
         switch (type) {
             case TransformerType.Replace:
                 return new Replace(options as ReplaceOptions);

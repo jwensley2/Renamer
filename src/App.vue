@@ -53,4 +53,9 @@ html, body, #app {
 .text-input {
     @apply block border px-2 py-1 rounded w-full
 }
+
+.text-input-sm {
+    @apply text-sm;
+}
+
 </style>

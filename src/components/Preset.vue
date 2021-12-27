@@ -32,7 +32,4 @@ export default defineComponent({
 </script>
 
 <style scoped>
-#sidebar {
-    min-width: 200px;
-}
 </style>
