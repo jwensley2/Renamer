@@ -48,6 +48,10 @@ html, body, #app {
 
 .btn-danger {
     @apply text-white bg-red-500 hover:bg-red-400;
+
+    &:disabled {
+        @apply bg-red-400 cursor-not-allowed;
+    }
 }
 
 .text-input {

@@ -27,6 +27,7 @@
             <button
                 class="btn btn-danger w-full"
                 @click.prevent="deleteStep"
+                :disabled="isLastPreset"
             >Delete Preset
             </button>
         </div>
@@ -34,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, reactive} from 'vue';
+import {computed, defineComponent, reactive} from 'vue';
 import _ from 'lodash';
 import {useStore} from '@/store';
 import {useRouter} from 'vue-router';
@@ -51,6 +52,11 @@ export default defineComponent({
 
         return {
             preset: preset,
+
+            isLastPreset: computed((): boolean => {
+                return store.state.presets.length === 1;
+            }),
+
             save: () => {
                 store.commit('updatePreset', preset);
                 router.push({name: 'files', params: {presetId: preset.id}});

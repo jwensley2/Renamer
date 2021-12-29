@@ -5,6 +5,8 @@ import SelectedFile from '@/file';
 import _ from 'lodash';
 import config from '@/config';
 import Preset, {PresetConfig} from '@/preset';
+import {TransformerType} from '@/transformers/transformer';
+import {Case} from '@/transformers/change-case';
 
 // Typings for the store state
 export interface State {
@@ -214,6 +216,39 @@ export const store = createStore<State>({
     },
 
     actions: {
+        setupDefault({commit}) {
+            const preset = new Preset('Default', [
+                new Step('Change to Lowercase', TransformerType.ChangeCase),
+                new Step('Replace Underscores', TransformerType.Replace, {search: '_', replace: ' '}),
+                new Step('Replace Dashes', TransformerType.Replace, {search: '-+(\s*)-+', replace: '-'}),
+                new Step('Replace List', TransformerType.ReplaceList, {
+                    replacements: [
+                        {
+                            search: /plane/.source,
+                            replace: 'train',
+                            regex: true,
+                            caseInsensitive: true,
+                        },
+                        {
+                            search: /snakes/.source,
+                            replace: 'rakes',
+                            regex: true,
+                            caseInsensitive: true,
+                        },
+                    ],
+                }),
+                new Step('Change to Titlecase', TransformerType.ChangeCase, {case: Case.TitleCase}),
+            ]);
+
+            preset.steps.forEach((step) => {
+                commit('addStep', step);
+            });
+
+            commit('addPreset', preset);
+            commit('savePresets');
+            commit('setSelectedPreset', preset.id);
+        },
+
         /**
          * Move a step to a new position in the steps
          */

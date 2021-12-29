@@ -46,6 +46,10 @@ const router = createRouter({
     ],
 });
 
+if (store.state.presets.length === 0) {
+    store.dispatch('setupDefault');
+}
+
 createApp(App, {
     router,
 })

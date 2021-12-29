@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import {computed, defineComponent, reactive, Ref, ref, watch} from 'vue';
+import {computed, defineComponent, reactive, ref, watch} from 'vue';
 import _ from 'lodash';
 import {Options as ReplaceOptions, Replacement} from '@/transformers/replace-list';
 import {default as ReplacementComponent} from '@/components/Replacement.vue';

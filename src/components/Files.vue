@@ -106,8 +106,9 @@ export default defineComponent({
     },
     setup(props) {
         const store = useStore();
+        const preset = store.getters.getPreset(props.presetId);
         const files = computed(() => {
-            return store.getters.files.map((file: SelectedFile) => file.transform(store.getters.getSteps(props.presetId, true)));
+            return preset.transformFiles(store.getters.files);
         });
         const draggingOver = ref(false);
 

@@ -12,7 +12,7 @@ const config = new Config({
     migrations: {
         '0.2.0': config => {
             const allSteps: Array<StepConfig> = [];
-            const presets = config.get('presets') as Array<Record<string, unknown>>;
+            const presets = config.get('presets') as Array<Record<string, unknown>> ?? [];
 
             _.forEach(presets, (preset) => {
                 const steps = preset.steps as Array<StepConfig>;

@@ -38,7 +38,7 @@ export default defineComponent({
             presets: computed(() => store.state.presets),
             selectedPreset: computed({
                 get: () => {
-                    return store.getters.getPreset(props.presetId).id;
+                    return store.getters.getPreset(props.presetId)?.id;
                 },
                 set: (presetId) => {
                     store.commit('setSelectedPreset', presetId);
