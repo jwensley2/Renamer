@@ -138,8 +138,8 @@ export default class SelectedFile {
 
         try {
             fs.renameSync(this.path, this.renamedPath);
-        } catch (e) {
-            if (_.startsWith(e.message, 'EBUSY')) {
+        } catch (e: unknown) {
+            if (e instanceof Error && _.startsWith(e.message, 'EBUSY')) {
                 this.error = 'File in use';
                 return;
             }

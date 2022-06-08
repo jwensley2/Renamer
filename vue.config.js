@@ -7,5 +7,8 @@ module.exports = {
             nodeIntegration: true,
             externals: ['path'],
         }
+    },
+    configureWebpack: {
+        devtool: 'source-map'
     }
 }

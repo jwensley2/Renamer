@@ -5,10 +5,10 @@ import {TransformerType} from '@/transformers/transformer';
 import {Options as ReplaceOptions} from '@/transformers/replace-list';
 import {v4 as uuidv4} from 'uuid';
 
-const isDevelopment = process.env.NODE_ENV !== 'production';
+const isProduction = process.env.NODE_ENV === 'production';
 
 const config = new Config({
-    name: isDevelopment ? 'config-dev' : 'config',
+    name: isProduction ? 'config' : `config-${process.env.NODE_ENV}`,
     migrations: {
         '0.2.0': config => {
             const allSteps: Array<StepConfig> = [];
