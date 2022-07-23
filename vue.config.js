@@ -2,7 +2,7 @@ module.exports = {
     pluginOptions: {
         electronBuilder: {
             builderOptions: {
-                productName: 'Renamer'
+                productName: 'Renamer',
             },
             nodeIntegration: true,
             externals: ['path'],

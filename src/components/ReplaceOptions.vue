@@ -1,27 +1,31 @@
 <template>
     <div>
-        <div class="my-2">
-            <label for="step-search">Search</label>
-            <input id="step-search" v-model="options.search" class="text-input" type="text">
+        <div class="form-control my-2">
+            <label for="step-search" class="label">
+                <span class="label-text">Search</span>
+            </label>
+            <input id="step-search" v-model="options.search" class="input input-bordered" type="text">
         </div>
 
-        <div class="my-2">
-            <label for="step-replace">Replace</label>
-            <input id="step-replace" v-model="options.replace" class="text-input" type="text">
+        <div class="form-control my-2">
+            <label for="step-replace" class="label">
+                <span class="label-text">Replace</span>
+            </label>
+            <input id="step-replace" v-model="options.replace" class="input input-bordered" type="text">
         </div>
 
-        <div class="my-2">
-            <div class="mt-4">
-                <input v-model="options.regex" class="mr-1" type="checkbox">
-                <label>Regex</label>
-            </div>
+        <div class="form-control mt-4 mb-2">
+            <label class="label justify-start py-0">
+                <input v-model="options.regex" class="checkbox checkbox-xs mr-1" type="checkbox">
+                <span class="label-text">Regex</span>
+            </label>
         </div>
 
-        <div class="my-2">
-            <div v-if="options.regex">
-                <input v-model="options.caseInsensitive" class="mr-1" type="checkbox">
-                <label>Case Insensitive</label>
-            </div>
+        <div v-if="options.regex" class="my-3 form-control">
+            <label class="label justify-start py-0">
+                <input v-model="options.caseInsensitive" class="checkbox checkbox-xs mr-1" type="checkbox">
+                <span class="label-text">Case Insensitive</span>
+            </label>
         </div>
     </div>
 </template>

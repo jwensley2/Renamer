@@ -1,13 +1,13 @@
 import {createApp} from 'vue';
 import {createRouter, createWebHistory} from 'vue-router';
 import App from './App.vue';
-import 'tailwindcss/tailwind.css';
+import '@/assets/tailwind.css';
 import {key, store} from './store';
-import Files from '@/components/Files.vue';
+import Files from '@/components/FileList.vue';
 import PresetEditor from '@/components/PresetEditor.vue';
 import StepEditor from '@/components/StepEditor.vue';
-import Preset from '@/components/Preset.vue';
-import Home from '@/components/Home.vue';
+import Preset from '@/views/PresetView.vue';
+import Home from '@/views/HomeView.vue';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -21,25 +21,41 @@ const router = createRouter({
             name: 'preset',
             path: '/preset/:presetId',
             component: Preset,
-            props: true,
+            props: (route) => {
+                return {
+                    preset: store.getters.getPreset(route.params.presetId),
+                };
+            },
             children: [
                 {
                     name: 'files',
                     path: '/preset/:presetId/files',
                     component: Files,
-                    props: true,
+                    props: (route) => {
+                        return {
+                            preset: store.getters.getPreset(route.params.presetId),
+                        };
+                    },
                 },
                 {
                     name: 'edit',
                     path: '/preset/:presetId/edit',
                     component: PresetEditor,
-                    props: true,
+                    props: (route) => {
+                        return {
+                            modelValue: store.getters.getPreset(route.params.presetId),
+                        };
+                    },
                 },
                 {
                     name: 'step',
                     path: 'step/:stepId/edit',
                     component: StepEditor,
-                    props: true,
+                    props: (route) => {
+                        return {
+                            modelValue: store.getters.getStep(route.params.stepId),
+                        };
+                    },
                 },
             ],
         },

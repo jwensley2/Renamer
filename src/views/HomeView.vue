@@ -29,7 +29,6 @@ import Preset from '@/preset';
 import {useRouter} from 'vue-router';
 
 export default defineComponent({
-    name: 'Home',
     setup() {
         const store = useStore();
         const router = useRouter();

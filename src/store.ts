@@ -10,6 +10,7 @@ import {Case} from '@/transformers/change-case';
 
 // Typings for the store state
 export interface State {
+    theme: string,
     selectedPreset?: string,
     presets: Array<PresetConfig>,
     steps: Array<StepConfig>,
@@ -22,6 +23,7 @@ export const key: InjectionKey<Store<State>> = Symbol();
 export const store = createStore<State>({
     state(): State {
         return {
+            theme: config.get('theme', 'dark') as string,
             selectedPreset: config.get('selectedPreset') as string,
             presets: config.get('presets') as Array<PresetConfig> ?? [],
             steps: config.get('steps') as Array<StepConfig> ?? [],

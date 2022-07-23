@@ -3,40 +3,45 @@
         <div class="overflow-y-auto pr-3">
             <h1 class="text-2xl">Edit Step</h1>
 
-            <div class="my-2">
-                <label for="step-label">Step Name</label>
+            <div class="form-control w-full my-2">
+                <label for="step-label" class="label">
+                    <span class="label-text">Step Name</span>
+                </label>
                 <input
                     id="step-label"
                     v-model="step.label"
-                    class="text-input"
+                    class="input input-bordered"
                     type="text"
                 >
             </div>
 
-            <div class="my-2">
-                <label>Type</label>
-                <select v-model="step.transformer" class="text-input" @change="transformerChanged">
+            <div class="form-control my-2">
+                <label for="step-type" class="label">
+                    <span class="label-text">Type</span>
+                </label>
+                <select id="step-type" v-model="step.transformer" class="select select-bordered" @change="transformerChanged">
                     <option v-for="type in TransformerType" :key="type" :value="type">{{ transformerLabel(type) }}</option>
                 </select>
             </div>
 
             <template v-if="step.transformer === TransformerType.ChangeCase">
-                <div class="my-2">
-                    <label>
-                        Part
-                        <select v-model="step.options.part" class="text-input">
-                            <option v-for="part in Part" :key="part" :value="part">{{ part }}</option>
-                        </select>
+                <div class="form-control my-2">
+                    <label for="step-part" class="label">
+                        <span class="label-text">Part</span>
                     </label>
+
+                    <select id="step-part" v-model="step.options.part" class="select select-bordered">
+                        <option v-for="part in Part" :key="part" :value="part">{{ part }}</option>
+                    </select>
                 </div>
 
-                <div class="my-2">
-                    <label>
-                        Change Case To
-                        <select v-model="step.options.case" class="text-input">
-                            <option v-for="textCase in Case" :key="textCase" :value="textCase">{{ caseLabel(textCase) }}</option>
-                        </select>
+                <div class="form-control my-2">
+                    <label class="label">
+                        <span class="label-text">Change Case To</span>
                     </label>
+                    <select v-model="step.options.case" class="select select-bordered">
+                        <option v-for="textCase in Case" :key="textCase" :value="textCase">{{ caseLabel(textCase) }}</option>
+                    </select>
                 </div>
             </template>
             <template v-else-if="step.transformer === TransformerType.Replace">
@@ -46,12 +51,14 @@
                 <replace-list-options v-model="step.options" :key="step.id"></replace-list-options>
             </template>
             <template v-else-if="step.transformer === TransformerType.Trim">
-                <div class="my-2">
-                    <label for="trim-characters">Characters</label>
+                <div class="form-control my-2">
+                    <label for="trim-characters" class="label">
+                        <span class="label-text">Characters</span>
+                    </label>
                     <input
                         id="trim-characters"
                         v-model="step.options.characters"
-                        class="text-input"
+                        class="input input-bordered"
                         type="text"
                     >
                 </div>
@@ -61,20 +68,20 @@
             </template>
         </div>
 
-        <div class="flex flex-1 justify-between pt-3 border-t">
+        <div class="flex justify-items-stretch pt-3 border-t border-neutral">
             <button
-                class="btn-sm btn-primary w-full mr-3"
+                class="btn btn-primary flex-1 mr-3"
                 @click.prevent="save"
             >Save
             </button>
             <button
-                class="btn-sm btn-warning w-full mr-3"
+                class="btn btn-warning flex-1 mr-3"
                 @click.prevent="close"
             >Cancel
             </button>
 
             <button
-                class="btn-sm btn-danger w-full"
+                class="btn btn-error flex-1"
                 @click.prevent="deleteStep"
             >Delete Step
             </button>
@@ -94,19 +101,24 @@ import RenameOptions from '@/components/RenameOptions.vue';
 import {onBeforeRouteUpdate, useRouter} from 'vue-router';
 import {useStore} from '@/store';
 import Preset from '@/preset';
+import Step from '@/step';
 
 export default defineComponent({
     name: 'StepEditor',
     components: {RenameOptions, ReplaceOptions, ReplaceListOptions},
     props: {
-        presetId: String,
-        stepId: String,
+        modelValue: {
+            type: Step,
+            required: true,
+        },
     },
-    setup(props, {emit}): Record<string, unknown> {
+    setup(props): Record<string, unknown> {
         const router = useRouter();
         const store = useStore();
-        let preset: Preset = store.getters.getPreset(props.presetId);
-        let step = ref(reactive(_.cloneDeep(store.getters.getStep(props.stepId))));
+        const step = ref(reactive(_.cloneDeep(props.modelValue)));
+        const preset: Preset = store.getters.selectedPreset;
+
+        console.log(props.modelValue, step.value);
 
         onBeforeRouteUpdate(async (to, from) => {
             if (to.params.stepId !== from.params.stepId) {

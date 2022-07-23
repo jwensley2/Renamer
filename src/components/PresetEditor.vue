@@ -2,30 +2,32 @@
     <form>
         <h1 class="text-2xl">Edit Preset</h1>
 
-        <div class="my-2">
-            <label for="step-label">Name</label>
+        <div class="my-2 form-control">
+            <label for="step-label" class="label">
+                <span class="label-text">Name</span>
+            </label>
             <input
                 id="step-label"
                 v-model="preset.name"
-                class="text-input"
+                class="input input-bordered"
                 type="text"
             >
         </div>
 
         <div class="flex flex-1 justify-between mt-10">
             <button
-                class="btn btn-primary w-full mr-3"
+                class="btn btn-primary flex-1 mr-3"
                 @click.prevent="save"
             >Save
             </button>
             <button
-                class="btn btn-warning w-full mr-3"
+                class="btn btn-warning flex-1 mr-3"
                 @click.prevent="close"
             >Cancel
             </button>
 
             <button
-                class="btn btn-danger w-full"
+                class="btn btn-error flex-2"
                 @click.prevent="deleteStep"
                 :disabled="isLastPreset"
             >Delete Preset
@@ -39,16 +41,19 @@ import {computed, defineComponent, reactive} from 'vue';
 import _ from 'lodash';
 import {useStore} from '@/store';
 import {useRouter} from 'vue-router';
+import Preset from '@/preset';
 
 export default defineComponent({
-    name: 'PresetEditor',
     props: {
-        presetId: String,
+        modelValue: {
+            type: Preset,
+            required: true,
+        },
     },
-    setup(props, {emit}) {
+    setup(props) {
         const router = useRouter();
         const store = useStore();
-        const preset = reactive(_.cloneDeep(store.getters.getPreset(props.presetId)));
+        const preset = reactive(_.cloneDeep(props.modelValue));
 
         return {
             preset: preset,

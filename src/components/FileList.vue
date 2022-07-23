@@ -9,15 +9,15 @@
     >
         <div
             v-if="draggingOver"
-            class="flex justify-center items-center bg-gray-300 top-0 bottom-0 left-0 right-0 absolute"
+            class="flex justify-center items-center bg-accent text-accent-content top-0 bottom-0 left-0 right-0 absolute z-50"
         >
             <div class="text-2xl">Drop Files Here</div>
         </div>
 
-        <div class="flex justify-between">
+        <div v-if="hasFiles" class="flex justify-between">
             <div>
                 <button
-                    class="btn btn-primary"
+                    class="btn btn-secondary align-middle mr-3"
                     @click="selectFiles"
                 >
                     Select Files
@@ -25,22 +25,21 @@
 
                 <button
                     v-if="files.length > 0"
-                    class="btn bg-green-600 hover:bg-green-500 font-semibold text-white ml-3"
+                    class="btn btn-primary gap-2 align-middle"
                     @click="renameFiles"
                 >
-                    <svg class="h-6 w-6 -mt-1 text-white inline-block" fill="currentColor" viewBox="0 0 20 20"
+                    <svg class="h-6 w-6 text-white inline-block" fill="currentColor" viewBox="0 0 20 20"
                          xmlns="http://www.w3.org/2000/svg">
                         <path clip-rule="evenodd"
                               d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
                               fill-rule="evenodd"/>
                     </svg>
-                    <span class="ml-2 leading-none">Rename Files</span>
+                    Rename Files
                 </button>
             </div>
 
             <div>
                 <button
-                    v-if="files.length > 0"
                     class="btn btn-warning ml-3"
                     @click="clearFiles"
                 >
@@ -49,9 +48,9 @@
             </div>
         </div>
 
-        <div class="overflow-x-scroll overflow-y-auto">
-            <table class="border w-full">
-                <thead class="border-b bg-gray-100">
+        <div v-if="hasFiles" class="overflow-x-auto overflow-y-auto mt-4">
+            <table class="table table-compact w-full">
+                <thead>
                 <tr>
                     <td class="px-2 py-1">Current Name</td>
                     <td class="px-2 py-1">New Name</td>
@@ -64,12 +63,12 @@
                     <tr
                         v-for="file in files"
                         :key="file.id"
-                        :class="{'text-gray-400': file.name === file.renamedName, 'text-red-500': file.error}"
-                        class="border-b whitespace-nowrap">
-                        <td class="px-2 py-0.5">{{ file.name }}{{ file.ext }}</td>
-                        <td class="px-2 py-0.5">{{ file.renamedName }}{{ file.renamedExt }}</td>
-                        <td class="px-2 py-0.5">{{ file.dir }}</td>
-                        <td v-if="hasErrors" class="px-2 py-0.5">{{ file.error }}</td>
+                        :class="{'active': file.name !== file.renamedName, 'text-red-500': file.error}"
+                        class="hover whitespace-nowrap">
+                        <td>{{ file.name }}{{ file.ext }}</td>
+                        <td>{{ file.renamedName }}{{ file.renamedExt }}</td>
+                        <td>{{ file.dir }}</td>
+                        <td v-if="hasErrors">{{ file.error }}</td>
                     </tr>
                 </template>
                 <tr v-else>
@@ -79,7 +78,7 @@
                     </td>
                 </tr>
                 </tbody>
-                <tfoot class="border-b bg-gray-100">
+                <tfoot>
                 <tr>
                     <td class="px-2 py-1">Current Name</td>
                     <td class="px-2 py-1">New Name</td>
@@ -88,6 +87,15 @@
                 </tr>
                 </tfoot>
             </table>
+        </div>
+        <div v-else-if="!draggingOver" class="hero min-h-max bg-base-200 flex-grow z-10">
+            <div class="hero-content text-center">
+                <div class="max-w-md">
+                    <h1 class="text-5xl font-bold">No Files Selected</h1>
+                    <p class="py-6">Select some files you want to rename to get started.</p>
+                    <button class="btn btn-primary" @click="selectFiles">Select Some Files</button>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -98,17 +106,19 @@ import {useStore} from '@/store';
 import {ipcRenderer, IpcRendererEvent, OpenDialogReturnValue} from 'electron';
 import SelectedFile from '@/file';
 import _ from 'lodash';
+import Preset from '@/preset';
 
 export default defineComponent({
-    name: 'Files',
     props: {
-        presetId: String,
+        preset: {
+            type: Preset,
+            required: true,
+        },
     },
     setup(props) {
         const store = useStore();
-        const preset = store.getters.getPreset(props.presetId);
         const files = computed(() => {
-            return preset.transformFiles(store.getters.files);
+            return props.preset.transformFiles(store.getters.files);
         });
         const draggingOver = ref(false);
 
@@ -116,6 +126,7 @@ export default defineComponent({
             files: files,
             hasErrors: computed(() => files.value.filter((file: SelectedFile) => file.error).length > 0),
             draggingOver: draggingOver,
+            hasFiles: computed(() => files.value.length > 0),
             selectFiles: () => {
                 ipcRenderer.send('select-files');
 
@@ -157,5 +168,17 @@ export default defineComponent({
 
 .drop-zone * {
     pointer-events: none
+}
+
+::-webkit-scrollbar {
+    @apply bg-neutral;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-neutral-focus;
+}
+
+::-webkit-scrollbar-corner {
+    background-color: teal;
 }
 </style>

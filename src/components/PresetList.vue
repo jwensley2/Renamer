@@ -2,15 +2,15 @@
     <div id="presets-sidebar">
         <h2 class="text-lg font-semibold">Preset</h2>
 
-        <select v-model="selectedPreset" class="text-input">
+        <select v-model="selectedPreset" class="select select-sm select-bordered w-full mb-1">
             <option v-for="preset in presets" :key="preset.id" :value="preset.id">{{ preset.name }}</option>
         </select>
 
         <div class="flex justify-items-stretch mt-1">
-            <button class="preset-buttons" @click.prevent="addPreset">Add Preset</button>
+            <button class="btn btn-secondary btn-xs flex-1 mr-2" @click.prevent="addPreset">Add Preset</button>
             <button
                 v-if="selectedPreset"
-                class="preset-buttons ml-2"
+                class="btn btn-secondary btn-xs flex-1"
                 @click.prevent="$router.push({name: 'edit', params: {presetId: selectedPreset}})"
             >
                 Edit Preset
@@ -26,11 +26,10 @@ import {useStore} from '@/store';
 import {useRouter} from 'vue-router';
 
 export default defineComponent({
-    name: 'Presets',
     props: {
         presetId: String,
     },
-    setup(props, {emit}) {
+    setup(props) {
         const store = useStore();
         const router = useRouter();
 

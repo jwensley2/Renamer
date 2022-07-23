@@ -10,6 +10,8 @@ import ElectronStore from 'electron-store';
 ElectronStore.initRenderer();
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
+declare const __static: string;
+
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -23,9 +25,12 @@ async function createWindow() {
         width: 1200,
         height: 700,
         webPreferences: {
+            // Required for Spectron testing
+            // enableRemoteModule: true,
+
             // Use pluginOptions.nodeIntegration, leave this alone
             // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-            nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
+            nodeIntegration: (process.env.ELECTRON_NODE_INTEGRATION as unknown) as boolean,
             contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION,
         },
         icon: path.join(__static, 'icon.png'),
@@ -65,7 +70,7 @@ app.on('ready', async () => {
         // Install Vue Devtoolsc
         try {
             await installExtension(VUEJS3_DEVTOOLS);
-        } catch (e) {
+        } catch (e: any) {
             console.error('Vue Devtools failed to install:', e.toString());
         }
     }

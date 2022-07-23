@@ -1,6 +1,6 @@
 import Step from '@/step';
 import {v4 as uuidv4} from 'uuid';
-import SelectedFile, {Part} from '@/file';
+import SelectedFile from '@/file';
 import {useStore} from '@/store';
 import _ from 'lodash';
 

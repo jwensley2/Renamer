@@ -1,8 +1,10 @@
 <template>
     <div>
-        <div class="my-2">
-            <label for="step-search">Template</label>
-            <input id="step-search" v-model="options.template" class="text-input" type="text">
+        <div class="form-control my-2">
+            <label for="step-search" class="label">
+                <span class="label-text">Template</span>
+            </label>
+            <input id="step-search" v-model="options.template" class="input input-bordered" type="text">
         </div>
 
         <div>
@@ -12,7 +14,7 @@
             <button
                 v-for="variable in templateVars"
                 :key="variable"
-                class="inline-block mr-2 border px-2 py-1 mb-2 text-blue-500"
+                class="mr-2 btn btn-xs btn-accent mb-2"
                 @click.prevent="insertVar(variable)"
             >
                 {{ variable }}
