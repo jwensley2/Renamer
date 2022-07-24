@@ -7,6 +7,7 @@ import config from '@/config';
 import Preset, {PresetConfig} from '@/preset';
 import {TransformerType} from '@/transformers/transformer';
 import {Case} from '@/transformers/change-case';
+import {Theme} from '@/theme';
 
 // Typings for the store state
 export interface State {
@@ -32,6 +33,17 @@ export const store = createStore<State>({
     },
 
     mutations: {
+        /**
+         * Set the application theme
+         * @param state
+         * @param theme
+         */
+        setTheme(state: State, theme: Theme) {
+            state.theme = theme;
+
+            config.set('theme', theme);
+        },
+
         /**
          * Add a new preset
          * @param state

@@ -115,10 +115,8 @@ export default defineComponent({
     setup(props): Record<string, unknown> {
         const router = useRouter();
         const store = useStore();
-        const step = ref(reactive(_.cloneDeep(props.modelValue)));
+        const step = ref(reactive(props.modelValue));
         const preset: Preset = store.getters.selectedPreset;
-
-        console.log(props.modelValue, step.value);
 
         onBeforeRouteUpdate(async (to, from) => {
             if (to.params.stepId !== from.params.stepId) {
@@ -143,8 +141,11 @@ export default defineComponent({
                 router.push({name: 'files', params: {presetId: preset.id}});
             },
             deleteStep: () => {
-                store.commit('deleteStep', step.value);
-                router.push({name: 'files', params: {presetId: preset.id}});
+                // Navigate away and then delete to avoid errors
+                router.push({name: 'files', params: {presetId: preset.id}})
+                    .then(() => {
+                        store.commit('deleteStep', step.value);
+                    });
             },
             transformerChanged: () => {
                 step.value.options = step.value.mergeOptionsWithDefaults(step.value.options);

@@ -8,6 +8,8 @@ import PresetEditor from '@/components/PresetEditor.vue';
 import StepEditor from '@/components/StepEditor.vue';
 import Preset from '@/views/PresetView.vue';
 import Home from '@/views/HomeView.vue';
+import {ipcRenderer} from 'electron';
+import {Theme} from '@/theme';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -74,3 +76,8 @@ createApp(App, {
     .mount('#app');
 
 store.dispatch('pruneSteps');
+
+// Listen for set theme events from the menu
+ipcRenderer.addListener('set-theme', (event, args) => {
+    store.commit('setTheme', args as Theme);
+});

@@ -1,11 +1,11 @@
 'use strict';
-/* global __static */
-
-import {app, BrowserWindow, dialog, ipcMain, protocol} from 'electron';
+import {app, BrowserWindow, dialog, ipcMain, protocol, Menu, MenuItem, MenuItemConstructorOptions} from 'electron';
 import {createProtocol} from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, {VUEJS3_DEVTOOLS} from 'electron-devtools-installer';
 import path from 'path';
 import ElectronStore from 'electron-store';
+import {Theme} from '@/theme';
+import _ from 'lodash';
 
 ElectronStore.initRenderer();
 
@@ -21,7 +21,6 @@ protocol.registerSchemesAsPrivileged([
 async function createWindow() {
     // Create the browser window.
     const win = new BrowserWindow({
-        title: 'Renamer',
         width: 1200,
         height: 700,
         webPreferences: {
@@ -45,6 +44,8 @@ async function createWindow() {
         // Load the index.html when not in development
         win.loadURL('app://./index.html');
     }
+
+    setMenu(win);
 }
 
 // Quit when all windows are closed.
@@ -76,6 +77,27 @@ app.on('ready', async () => {
     }
     createWindow();
 });
+
+function setMenu(window: BrowserWindow) {
+    const menu = Menu.getApplicationMenu();
+
+    if (!menu) return;
+
+    const themeMenu = new MenuItem({
+        label: 'Theme',
+        submenu: _.map(Theme, (value, label) => {
+            return {
+                label: label,
+                click: async () => {
+                    window.webContents.send('set-theme', value);
+                },
+            };
+        }),
+    });
+
+    menu.append(themeMenu);
+    Menu.setApplicationMenu(menu);
+}
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {

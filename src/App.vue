@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent} from 'vue';
+import {computed, defineComponent} from 'vue';
 import {useStore} from '@/store';
 import {useRouter} from 'vue-router';
 
@@ -21,7 +21,7 @@ export default defineComponent({
         }
 
         return {
-            theme: store.state.theme,
+            theme: computed(() => store.state.theme),
         };
     },
 });
