@@ -52,10 +52,18 @@
             <table class="table table-compact w-full">
                 <thead>
                 <tr>
-                    <td class="px-2 py-1">Current Name</td>
-                    <td class="px-2 py-1">New Name</td>
-                    <td class="px-2 py-1">Directory</td>
-                    <td v-if="hasErrors" class="px-2 py-1">Error</td>
+                    <th class="px-2 py-1">
+                        <input
+                            type="checkbox"
+                            v-model="selectAll"
+                            class="checkbox checkbox-xs"
+                            :indeterminate.prop="selectAll === null"
+                        />
+                    </th>
+                    <th class="px-2 py-1">Current Name</th>
+                    <th class="px-2 py-1">New Name</th>
+                    <th class="px-2 py-1">Directory</th>
+                    <th v-if="hasErrors" class="px-2 py-1">Error</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -65,6 +73,7 @@
                         :key="file.id"
                         :class="{'active': file.name !== file.renamedName, 'text-red-500': file.error}"
                         class="hover whitespace-nowrap">
+                        <td><input type="checkbox" class="checkbox checkbox-xs" v-model="file.selected"></td>
                         <td>{{ file.name }}{{ file.ext }}</td>
                         <td>{{ file.renamedName }}{{ file.renamedExt }}</td>
                         <td>{{ file.dir }}</td>
@@ -80,10 +89,18 @@
                 </tbody>
                 <tfoot>
                 <tr>
-                    <td class="px-2 py-1">Current Name</td>
-                    <td class="px-2 py-1">New Name</td>
-                    <td class="px-2 py-1">Directory</td>
-                    <td v-if="hasErrors" class="px-2 py-1">Error</td>
+                    <th class="px-2 py-1">
+                        <input
+                            type="checkbox"
+                            v-model="selectAll"
+                            class="checkbox checkbox-xs"
+                            :indeterminate.prop="selectAll === null"
+                        />
+                    </th>
+                    <th class="px-2 py-1">Current Name</th>
+                    <th class="px-2 py-1">New Name</th>
+                    <th class="px-2 py-1">Directory</th>
+                    <th v-if="hasErrors" class="px-2 py-1">Error</th>
                 </tr>
                 </tfoot>
             </table>
@@ -127,6 +144,25 @@ export default defineComponent({
             hasErrors: computed(() => files.value.filter((file: SelectedFile) => file.error).length > 0),
             draggingOver: draggingOver,
             hasFiles: computed(() => files.value.length > 0),
+            selectAll: computed({
+                get: () => {
+                    let hasSelected = false;
+                    let hasUnselected = false;
+
+                    files.value.forEach((file) => {
+                        hasSelected = hasSelected || file.selected;
+                        hasUnselected = hasUnselected || !file.selected;
+                    });
+
+                    console.log((hasSelected && hasUnselected) ? null : (hasSelected && !hasUnselected));
+                    return (hasSelected && hasUnselected) ? null : (hasSelected && !hasUnselected);
+                },
+                set: (newValue) => {
+                    files.value.forEach((file) => {
+                        file.selected = !!newValue;
+                    });
+                },
+            }),
             selectFiles: () => {
                 ipcRenderer.send('select-files');
 
@@ -143,6 +179,10 @@ export default defineComponent({
                 files.value.forEach((file: SelectedFile) => {
                     file.rename();
                 });
+
+                if (store.state.clearOnRename) {
+                    store.commit('clearFiles');
+                }
             },
             handleDrop: (event: DragEvent) => {
                 if (!event.dataTransfer) return;
@@ -168,17 +208,5 @@ export default defineComponent({
 
 .drop-zone * {
     pointer-events: none
-}
-
-::-webkit-scrollbar {
-    @apply bg-neutral;
-}
-
-::-webkit-scrollbar-thumb {
-    @apply bg-neutral-focus;
-}
-
-::-webkit-scrollbar-corner {
-    background-color: teal;
 }
 </style>

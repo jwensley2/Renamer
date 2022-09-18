@@ -1,17 +1,14 @@
 'use strict';
-import {app, BrowserWindow, dialog, ipcMain, protocol, Menu, MenuItem, MenuItemConstructorOptions} from 'electron';
+import {app, BrowserWindow, dialog, ipcMain, Menu, MenuItem, protocol} from 'electron';
 import {createProtocol} from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, {VUEJS3_DEVTOOLS} from 'electron-devtools-installer';
 import path from 'path';
 import ElectronStore from 'electron-store';
-import {Theme} from '@/theme';
-import _ from 'lodash';
 
 ElectronStore.initRenderer();
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 declare const __static: string;
-
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -70,7 +67,11 @@ app.on('ready', async () => {
     if (isDevelopment && !process.env.IS_TEST) {
         // Install Vue Devtoolsc
         try {
-            await installExtension(VUEJS3_DEVTOOLS);
+            await installExtension(VUEJS3_DEVTOOLS, {
+                loadExtensionOptions: {
+                    allowFileAccess: true,
+                },
+            });
         } catch (e: any) {
             console.error('Vue Devtools failed to install:', e.toString());
         }
@@ -83,19 +84,18 @@ function setMenu(window: BrowserWindow) {
 
     if (!menu) return;
 
-    const themeMenu = new MenuItem({
-        label: 'Theme',
-        submenu: _.map(Theme, (value, label) => {
-            return {
-                label: label,
-                click: async () => {
-                    window.webContents.send('set-theme', value);
-                },
-            };
-        }),
-    });
+    const fileMenu = menu.items.find((item) => item.role && item.role.toLowerCase() === 'filemenu');
 
-    menu.append(themeMenu);
+    if (fileMenu && fileMenu.submenu) {
+        fileMenu.submenu.insert(0, new MenuItem({
+            label: 'Settings',
+            click: async () => {
+                window.webContents.send('open-settings');
+            },
+        }));
+        fileMenu.submenu.insert(1, new MenuItem({type: 'separator'}));
+    }
+
     Menu.setApplicationMenu(menu);
 }
 

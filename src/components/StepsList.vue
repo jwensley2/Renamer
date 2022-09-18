@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="overflow-y-auto">
         <h2 class="text-lg font-semibold">Renaming Steps</h2>
 
         <ol id="steps" class="mb-3 whitespace-nowrap">

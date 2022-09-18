@@ -13,6 +13,8 @@ export enum Part {
 export default class SelectedFile {
     public id: string;
 
+    public selected = true;
+
     public name: string;
     public renamedName: string;
 

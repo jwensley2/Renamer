@@ -23,7 +23,13 @@ export default class Preset {
 
     public transformFiles(files: Array<SelectedFile>): Array<SelectedFile> {
         const store = useStore();
-        const transformed = files.map((file: SelectedFile) => file.transform(store.getters.getSteps(this.id, true)));
+        const transformed = files.map((file: SelectedFile) => {
+            if (!file.selected) {
+                return file.transform([]);
+            }
+
+            return file.transform(store.getters.getSteps(this.id, true));
+        });
 
         this.suffixDuplicates(transformed);
 

@@ -16,6 +16,7 @@ export interface State {
     presets: Array<PresetConfig>,
     steps: Array<StepConfig>,
     files: SelectedFile[],
+    clearOnRename: boolean,
 }
 
 // define injection key
@@ -29,6 +30,7 @@ export const store = createStore<State>({
             presets: config.get('presets') as Array<PresetConfig> ?? [],
             steps: config.get('steps') as Array<StepConfig> ?? [],
             files: [],
+            clearOnRename: !!config.get('clearOnRename', false),
         };
     },
 
@@ -42,6 +44,17 @@ export const store = createStore<State>({
             state.theme = theme;
 
             config.set('theme', theme);
+        },
+
+        /**
+         * Set the clear on rename settings
+         * @param state
+         * @param value
+         */
+        setClearOnRename(state: State, value: boolean) {
+            state.clearOnRename = value;
+
+            config.set('clearOnRename', value);
         },
 
         /**
