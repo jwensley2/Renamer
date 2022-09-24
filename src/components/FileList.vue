@@ -154,7 +154,6 @@ export default defineComponent({
                         hasUnselected = hasUnselected || !file.selected;
                     });
 
-                    console.log((hasSelected && hasUnselected) ? null : (hasSelected && !hasUnselected));
                     return (hasSelected && hasUnselected) ? null : (hasSelected && !hasUnselected);
                 },
                 set: (newValue) => {
@@ -167,8 +166,8 @@ export default defineComponent({
                 ipcRenderer.send('select-files');
 
                 ipcRenderer.on('files-selected', (event: IpcRendererEvent, arg: OpenDialogReturnValue) => {
-                    store.state.files = arg.filePaths.map((filePath) => {
-                        return new SelectedFile(filePath);
+                    arg.filePaths.forEach((filePath) => {
+                        store.dispatch('addFileFromPath', {path: filePath});
                     });
                 });
             },
@@ -190,7 +189,7 @@ export default defineComponent({
                 _.each(event.dataTransfer.items, (item) => {
                     if (item.kind === 'file') {
                         const file = item.getAsFile();
-                        if (file) store.commit('addFileFromPath', file.path);
+                        if (file) store.dispatch('addFileFromPath', {path: file.path});
                     }
                 });
             },

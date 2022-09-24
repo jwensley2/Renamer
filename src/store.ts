@@ -8,6 +8,7 @@ import Preset, {PresetConfig} from '@/preset';
 import {TransformerType} from '@/transformers/transformer';
 import {Case} from '@/transformers/change-case';
 import {Theme} from '@/theme';
+import chokidar from 'chokidar';
 
 // Typings for the store state
 export interface State {
@@ -159,17 +160,6 @@ export const store = createStore<State>({
         },
 
         /**
-         * Add a new file from the file path, if the file has already been added it will be ignored
-         * @param state
-         * @param path
-         */
-        addFileFromPath(state: State, path: string) {
-            if (!_.find(state.files, {path: path})) {
-                state.files.push(new SelectedFile(path));
-            }
-        },
-
-        /**
          * Clear the list of files
          * @param state
          */
@@ -314,6 +304,35 @@ export const store = createStore<State>({
 
             state.steps = state.steps.filter((step) => usedStepIds.indexOf(step.id) !== -1);
             config.set('steps', state.steps);
+        },
+
+        /**
+         * Add a new file from the file path, if the file has already been added it will be ignored
+         */
+        addFileFromPath({state, dispatch}, payload: { path: string }) {
+            const {path} = payload;
+
+            if (!_.find(state.files, {path: path})) {
+                const file = new SelectedFile(path);
+
+                state.files.push(file);
+
+                // Remove any files that get renamed/deleted
+                chokidar.watch(path).once('unlink', () => {
+                    dispatch('removeFileByPath', {path: path});
+                });
+            }
+        },
+
+        /**
+         * Remove a file by it's path
+         */
+        removeFileByPath({state}, payload: { path: string }) {
+            const {path} = payload;
+
+            state.files = _.filter(state.files, (file) => {
+                return file.path !== path;
+            });
         },
     },
 });
