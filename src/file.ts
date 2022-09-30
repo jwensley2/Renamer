@@ -10,7 +10,33 @@ export enum Part {
     Extension = 'Extension'
 }
 
-export default class SelectedFile {
+export interface SelectedFileInterface {
+    id: string,
+    selected: boolean;
+    name: string,
+    renamedName: string;
+    ext: string;
+    renamedExt: string;
+    dir: string;
+    renamedDir: string;
+    error: string | null;
+    renamedPath: string;
+    path: string;
+
+    transform(steps: Array<Step>): this;
+
+    getPart(part: Part): string;
+
+    setPart(part: Part, value: string): void;
+
+    canRename(): [boolean, string | null];
+
+    rename(): void;
+
+    read(): Buffer;
+}
+
+export default class SelectedFile implements SelectedFileInterface {
     public id: string;
 
     public selected = true;
@@ -154,5 +180,9 @@ export default class SelectedFile {
         this.name = this.renamedName;
         this.ext = this.renamedExt;
         this.dir = this.renamedDir;
+    }
+
+    public read(): Buffer {
+        return fs.readFileSync(this.path);
     }
 }

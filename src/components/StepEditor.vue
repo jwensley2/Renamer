@@ -91,7 +91,7 @@
 
 <script lang="ts">
 import {label as transformerLabel, TransformerType} from '@/transformers/transformer';
-import {computed, defineComponent, reactive, ref} from 'vue';
+import {computed, defineComponent, PropType, reactive, ref} from 'vue';
 import _ from 'lodash';
 import {Case, caseLabel} from '@/transformers/change-case';
 import {Part} from '@/file';
@@ -99,28 +99,31 @@ import ReplaceListOptions from '@/components/ReplaceListOptions.vue';
 import ReplaceOptions from '@/components/ReplaceOptions.vue';
 import RenameOptions from '@/components/RenameOptions.vue';
 import {onBeforeRouteUpdate, useRouter} from 'vue-router';
-import {useStore} from '@/store';
-import Preset from '@/preset';
 import Step from '@/step';
+import {useStepStore} from '@/stores/steps';
+import {usePresetStore} from '@/stores/preset';
+import {PresetInterface} from '@/preset';
 
 export default defineComponent({
     name: 'StepEditor',
     components: {RenameOptions, ReplaceOptions, ReplaceListOptions},
     props: {
         modelValue: {
-            type: Step,
+            type: Object as PropType<Step>,
             required: true,
         },
     },
     setup(props): Record<string, unknown> {
         const router = useRouter();
-        const store = useStore();
+        const stepStore = useStepStore();
+        const presetStore = usePresetStore();
         const step = ref(reactive(props.modelValue));
-        const preset: Preset = store.getters.selectedPreset;
+        const preset = presetStore.selectedPreset as PresetInterface;
 
         onBeforeRouteUpdate(async (to, from) => {
             if (to.params.stepId !== from.params.stepId) {
-                step.value = reactive(_.cloneDeep(store.getters.getStep(to.params.stepId)));
+                const toStep = stepStore.getStep(to.params.stepId as string);
+                if (toStep) step.value = reactive(_.cloneDeep(toStep));
             }
         });
 
@@ -134,7 +137,7 @@ export default defineComponent({
             }),
             caseLabel: caseLabel,
             save: () => {
-                store.commit('updateStep', step.value);
+                stepStore.updateStep(step.value);
                 router.push({name: 'files', params: {presetId: preset.id}});
             },
             close: () => {
@@ -144,7 +147,7 @@ export default defineComponent({
                 // Navigate away and then delete to avoid errors
                 router.push({name: 'files', params: {presetId: preset.id}})
                     .then(() => {
-                        store.commit('deleteStep', step.value);
+                        stepStore.deleteStep(step.value);
                     });
             },
             transformerChanged: () => {

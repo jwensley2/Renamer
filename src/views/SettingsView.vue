@@ -28,8 +28,8 @@
 <script lang="ts">
 import {computed, defineComponent} from 'vue';
 import {Theme} from '@/theme';
-import {useStore} from '@/store';
 import {XMarkIcon} from '@heroicons/vue/20/solid';
+import {useSettingsStore} from '@/stores/settings';
 
 export default defineComponent({
     name: 'SettingsView',
@@ -38,16 +38,19 @@ export default defineComponent({
     },
     emits: ['close'],
     setup() {
-        const store = useStore();
+        const store = useSettingsStore();
 
         return {
             store,
             themes: Theme,
             theme: computed({
-                get: () => store.state.theme,
-                set: (newValue) => store.commit('setTheme', newValue),
+                get: () => store.theme,
+                set: (newValue) => store.setTheme(newValue),
             }),
-            clearOnRename: store.state.clearOnRename,
+            clearOnRename: computed({
+                get: () => store.clearOnRename,
+                set: (newValue) => store.setClearOnRename(newValue),
+            }),
         };
     },
 });

@@ -7,7 +7,7 @@
                 <li class="preset" v-for="preset in presets" :key="preset.id">
                     <button
                         class="w-full p-2 hover:bg-gray-400"
-                        @click.prevent="$router.push({name: 'preset', params: {presetId: preset.id}})"
+                        @click.prevent="$router.push({name: 'files', params: {presetId: preset.id}})"
                     >
                         {{ preset.name }}
                     </button>
@@ -24,21 +24,21 @@
 
 <script lang="ts">
 import {computed, defineComponent} from 'vue';
-import {useStore} from '@/store';
 import Preset from '@/preset';
 import {useRouter} from 'vue-router';
+import {usePresetStore} from '@/stores/preset';
 
 export default defineComponent({
     setup() {
-        const store = useStore();
+        const presetStore = usePresetStore();
         const router = useRouter();
 
         return {
-            presets: computed(() => store.state.presets),
+            presets: computed(() => presetStore.presets),
             createPreset() {
                 const preset = new Preset('New Preset');
 
-                store.commit('addPreset', preset);
+                presetStore.addPreset(preset);
                 router.push({name: 'edit', params: {presetId: preset.id}});
             },
         };

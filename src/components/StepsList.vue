@@ -15,7 +15,7 @@
                 @drop="onDrop($event, step)"
                 @dragover.prevent
             >
-                <span class="text-gray-400 mr-2 cursor-move">::</span>
+                <span class="text-gray-400 mr-2 cursor-move flex items-center text-base-content/25"><bars4-icon class="w-4 h-4"/></span>
                 <button
                     class="mr-5 flex-1 text-left step-name focus:outline-none"
                     @click="$router.push({name: 'step', params: {stepId: step.id}})"
@@ -39,11 +39,15 @@
 import {defineComponent} from 'vue';
 import Step from '@/step';
 import {TransformerType} from '@/transformers/transformer';
-import {useStore} from '@/store';
 import {useRoute, useRouter} from 'vue-router';
 import Preset from '@/preset';
+import {useStepStore} from '@/stores/steps';
+import {Bars4Icon} from '@heroicons/vue/24/solid';
 
 export default defineComponent({
+    components: {
+        Bars4Icon
+    },
     props: {
         preset: {
             type: Preset,
@@ -52,18 +56,18 @@ export default defineComponent({
     },
     setup(props) {
         const router = useRouter();
-        const store = useStore();
+        const stepStore = useStepStore();
 
         return {
             addStep: () => {
                 const step = new Step('', TransformerType.ChangeCase);
 
-                store.dispatch('addStepForPreset', {preset: props.preset, step: step});
+                stepStore.addStepForPreset(props.preset, step);
 
                 router.push({name: 'step', params: {stepId: step.id}});
             },
             changeStepActive: (step: Step) => {
-                store.commit('setStepActive', {id: step.id, active: step.active});
+                stepStore.setStepActive(step.id, step.active);
             },
             startDrag: (evt: DragEvent, step: Step) => {
                 if (!evt.dataTransfer) return;
@@ -80,7 +84,7 @@ export default defineComponent({
                 const droppedStepIndex = props.preset.steps.findIndex((step: Step) => step.id === stepId);
 
                 if (stepIndex !== droppedStepIndex) {
-                    store.dispatch('moveStep', {preset: props.preset, oldIndex: droppedStepIndex, newIndex: stepIndex});
+                    stepStore.moveStep(props.preset, droppedStepIndex, stepIndex);
                 }
 
                 step.draggedOver = false;

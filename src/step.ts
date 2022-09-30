@@ -54,7 +54,7 @@ export default class Step {
         transformer.transform(file);
     }
 
-    public mergeOptionsWithDefaults(options = {}): Record<string, unknown> {
+    public mergeOptionsWithDefaults(options = {}): TransformerOptions {
         const transformer = TransformerFactory.makeTransformer(this.transformer, {});
         return Object.assign({}, transformer.defaultOptions(), options);
     }

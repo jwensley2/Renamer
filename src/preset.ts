@@ -1,34 +1,44 @@
 import Step from '@/step';
 import {v4 as uuidv4} from 'uuid';
-import SelectedFile from '@/file';
-import {useStore} from '@/store';
+import {SelectedFileInterface} from '@/file';
 import _ from 'lodash';
+import {useStepStore} from '@/stores/steps';
 
 export interface PresetConfig {
-    id: string,
-    name: string,
-    steps: Array<string>,
+    id: string;
+    name: string;
+    steps: string[];
 }
 
-export default class Preset {
+export interface PresetInterface {
+    id: string;
+    name: string;
+    steps: Step[];
+
+    toJSON(): PresetConfig;
+}
+
+export default class Preset implements PresetInterface {
     public id: string;
     public name: string;
-    public steps: Array<Step>;
+    public steps: Step[];
 
-    constructor(name: string, steps: Array<Step> = []) {
+    constructor(name: string, steps: Step[] = []) {
         this.id = uuidv4();
         this.name = name;
         this.steps = steps;
     }
 
-    public transformFiles(files: Array<SelectedFile>): Array<SelectedFile> {
-        const store = useStore();
-        const transformed = files.map((file: SelectedFile) => {
+    public transformFiles(files: SelectedFileInterface[]): SelectedFileInterface[] {
+        const stepStore = useStepStore();
+        const steps = stepStore.getSteps(this.id, true);
+
+        const transformed = files.map((file: SelectedFileInterface) => {
             if (!file.selected) {
                 return file.transform([]);
             }
 
-            return file.transform(store.getters.getSteps(this.id, true));
+            return file.transform(steps);
         });
 
         this.suffixDuplicates(transformed);
@@ -61,8 +71,8 @@ export default class Preset {
      * @param files
      * @protected
      */
-    protected suffixDuplicates(files: Array<SelectedFile>): void {
-        const duplicates: { [key: string]: Array<SelectedFile> } = {};
+    protected suffixDuplicates(files: SelectedFileInterface[]): void {
+        const duplicates: { [key: string]: SelectedFileInterface[] } = {};
 
         // Find files where the renamed path is duplicated
         files.forEach((file) => {

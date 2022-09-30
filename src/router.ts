@@ -1,10 +1,11 @@
 import {createRouter, createWebHistory} from 'vue-router';
-import {store} from '@/store';
 import Home from '@/views/HomeView.vue';
 import Preset from '@/views/PresetView.vue';
 import Files from '@/components/FileList.vue';
 import PresetEditor from '@/components/PresetEditor.vue';
 import StepEditor from '@/components/StepEditor.vue';
+import {usePresetStore} from '@/stores/preset';
+import {useStepStore} from '@/stores/steps';
 
 export default createRouter({
     history: createWebHistory(),
@@ -18,9 +19,20 @@ export default createRouter({
             name: 'preset',
             path: '/preset/:presetId',
             component: Preset,
+            beforeEnter: (to, from, next) => {
+                const presetStore = usePresetStore();
+                const preset = presetStore.getPreset(to.params.presetId as string);
+
+                if (!preset) {
+                    return next({path: '/'});
+                }
+
+                next();
+            },
             props: (route) => {
+                const presetStore = usePresetStore();
                 return {
-                    preset: store.getters.getPreset(route.params.presetId),
+                    modelValue: presetStore.getPreset(route.params.presetId as string),
                 };
             },
             children: [
@@ -29,8 +41,10 @@ export default createRouter({
                     path: '/preset/:presetId/files',
                     component: Files,
                     props: (route) => {
+                        const presetStore = usePresetStore();
+
                         return {
-                            preset: store.getters.getPreset(route.params.presetId),
+                            preset: presetStore.getPreset(route.params.presetId as string),
                         };
                     },
                 },
@@ -39,8 +53,10 @@ export default createRouter({
                     path: '/preset/:presetId/edit',
                     component: PresetEditor,
                     props: (route) => {
+                        const presetStore = usePresetStore();
+
                         return {
-                            modelValue: store.getters.getPreset(route.params.presetId),
+                            modelValue: presetStore.getPreset(route.params.presetId as string),
                         };
                     },
                 },
@@ -49,8 +65,10 @@ export default createRouter({
                     path: 'step/:stepId/edit',
                     component: StepEditor,
                     props: (route) => {
+                        const stepStore = useStepStore();
+
                         return {
-                            modelValue: store.getters.getStep(route.params.stepId),
+                            modelValue: stepStore.getStep(route.params.stepId as string),
                         };
                     },
                 },

@@ -10,10 +10,11 @@
 
 <script lang="ts">
 import {computed, defineComponent, ref} from 'vue';
-import {useStore} from '@/store';
 import {useRouter} from 'vue-router';
-import Settings from '@/views/SettingsView.vue';
 import events from '@/events';
+import {useSettingsStore} from '@/stores/settings';
+import {usePresetStore} from '@/stores/preset';
+import Settings from '@/views/SettingsView.vue';
 
 export default defineComponent({
     components: {
@@ -21,12 +22,13 @@ export default defineComponent({
     },
 
     setup() {
-        const store = useStore();
+        const settingsStore = useSettingsStore();
+        const presetStore = usePresetStore();
         const router = useRouter();
         const showSettings = ref(false);
 
-        if (store.getters.selectedPreset) {
-            router.push({name: 'files', params: {presetId: store.getters.selectedPreset.id}});
+        if (presetStore.selectedPresetId) {
+            router.push({name: 'files', params: {presetId: presetStore.selectedPresetId}});
         }
 
         events.on('showSettings', () => {
@@ -34,7 +36,7 @@ export default defineComponent({
         });
 
         return {
-            theme: computed(() => store.state.theme),
+            theme: computed(() => settingsStore.theme),
             showSettings,
         };
     },

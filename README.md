@@ -7,13 +7,15 @@ There are currently four types of steps
 - Replace List - A list of string/regex replacements
 - Change Case - Change to upper/lower/title case
 - Trim - Trim any characters off the start/end of the name
+- Rename - Replace the entire file name based on a template
 
-More steps will be added in the future.
+More steps may be added in the future.
 
 ## Screenshots
 
-<img src="/public/screenshots/main-screen.png" title="Main Screen" width="300">
-<img src="/public/screenshots/edit-step.png" title="Edit Step Screen" width="300">
+<img src="./public/screenshots/select-files.png" title="Select Files Screen" width="300">
+<img src="./public/screenshots/main-screen.png" title="Main Screen" width="300">
+<img src="./public/screenshots/edit-step.png" title="Edit Step Screen" width="300">
 
 ## Project setup
 ```

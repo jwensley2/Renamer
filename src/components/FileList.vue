@@ -119,11 +119,12 @@
 
 <script lang="ts">
 import {computed, defineComponent, ref} from 'vue';
-import {useStore} from '@/store';
 import {ipcRenderer, IpcRendererEvent, OpenDialogReturnValue} from 'electron';
-import SelectedFile from '@/file';
 import _ from 'lodash';
+import {SelectedFileInterface} from '@/file';
 import Preset from '@/preset';
+import {useFileStore} from '@/stores/file';
+import {useSettingsStore} from '@/stores/settings';
 
 export default defineComponent({
     props: {
@@ -133,15 +134,16 @@ export default defineComponent({
         },
     },
     setup(props) {
-        const store = useStore();
+        const fileStore = useFileStore();
+        const settingsStore = useSettingsStore();
         const files = computed(() => {
-            return props.preset.transformFiles(store.getters.files);
+            return props.preset.transformFiles(fileStore.files);
         });
         const draggingOver = ref(false);
 
         return {
             files: files,
-            hasErrors: computed(() => files.value.filter((file: SelectedFile) => file.error).length > 0),
+            hasErrors: computed(() => files.value.filter((file: SelectedFileInterface) => file.error).length > 0),
             draggingOver: draggingOver,
             hasFiles: computed(() => files.value.length > 0),
             selectAll: computed({
@@ -167,31 +169,32 @@ export default defineComponent({
 
                 ipcRenderer.on('files-selected', (event: IpcRendererEvent, arg: OpenDialogReturnValue) => {
                     arg.filePaths.forEach((filePath) => {
-                        store.dispatch('addFileFromPath', {path: filePath});
+                        fileStore.addFileFromPath(filePath);
                     });
                 });
             },
             clearFiles: () => {
-                store.commit('clearFiles');
+                fileStore.clearFiles();
             },
             renameFiles: () => {
-                files.value.forEach((file: SelectedFile) => {
+                files.value.forEach((file: SelectedFileInterface) => {
                     file.rename();
                 });
 
-                if (store.state.clearOnRename) {
-                    store.commit('clearFiles');
+                if (settingsStore.clearOnRename) {
+                    fileStore.clearFiles();
                 }
             },
             handleDrop: (event: DragEvent) => {
                 if (!event.dataTransfer) return;
 
-                _.each(event.dataTransfer.items, (item) => {
-                    if (item.kind === 'file') {
-                        const file = item.getAsFile();
-                        if (file) store.dispatch('addFileFromPath', {path: file.path});
-                    }
-                });
+                const paths = _.filter(event.dataTransfer.items, (item) => {
+                    return item.kind === 'file';
+                }).map((item) => {
+                    return item.getAsFile()?.path;
+                }).filter((path): path is string => !!path);
+
+                fileStore.addFilesFromPaths(paths);
             },
         };
     },

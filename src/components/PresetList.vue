@@ -22,33 +22,38 @@
 <script lang="ts">
 import {computed, defineComponent} from 'vue';
 import Preset from '@/preset';
-import {useStore} from '@/store';
 import {useRouter} from 'vue-router';
+import {usePresetStore} from '@/stores/preset';
 
 export default defineComponent({
     props: {
-        presetId: String,
+        presetId: {
+            type: String,
+            required: true,
+        },
     },
     setup(props) {
-        const store = useStore();
+        const presetStore = usePresetStore();
         const router = useRouter();
 
         return {
-            presets: computed(() => store.state.presets),
+            presets: computed(() => presetStore.presets),
             selectedPreset: computed({
                 get: () => {
-                    return store.getters.getPreset(props.presetId)?.id;
+                    return presetStore.getPreset(props.presetId)?.id;
                 },
                 set: (presetId) => {
-                    store.commit('setSelectedPreset', presetId);
-                    router.push({name: 'files', params: {presetId: presetId}});
+                    if (presetId) {
+                        presetStore.setSelectedPreset(presetId);
+                        router.push({name: 'files', params: {presetId: presetId}});
+                    }
                 },
             }),
 
             addPreset: () => {
                 const preset = new Preset('');
 
-                store.commit('addPreset', preset);
+                presetStore.addPreset(preset);
                 router.push({name: 'edit', params: {presetId: preset.id}});
             },
         };

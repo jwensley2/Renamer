@@ -39,9 +39,9 @@
 <script lang="ts">
 import {computed, defineComponent, reactive} from 'vue';
 import _ from 'lodash';
-import {useStore} from '@/store';
 import {useRouter} from 'vue-router';
 import Preset from '@/preset';
+import {usePresetStore} from '@/stores/preset';
 
 export default defineComponent({
     props: {
@@ -52,18 +52,18 @@ export default defineComponent({
     },
     setup(props) {
         const router = useRouter();
-        const store = useStore();
+        const presetStore = usePresetStore();
         const preset = reactive(_.cloneDeep(props.modelValue));
 
         return {
             preset: preset,
 
             isLastPreset: computed((): boolean => {
-                return store.state.presets.length === 1;
+                return presetStore.presets.length === 1;
             }),
 
             save: () => {
-                store.commit('updatePreset', preset);
+                presetStore.updatePreset(preset);
                 router.push({name: 'files', params: {presetId: preset.id}});
             },
 
@@ -72,7 +72,7 @@ export default defineComponent({
             },
 
             deleteStep: () => {
-                store.commit('deletePreset', preset);
+                presetStore.deletePreset(preset);
                 router.push('/');
             },
         };
