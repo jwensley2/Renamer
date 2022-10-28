@@ -177,9 +177,7 @@ export default defineComponent({
                 fileStore.clearFiles();
             },
             renameFiles: () => {
-                files.value.forEach((file: SelectedFileInterface) => {
-                    file.rename();
-                });
+                fileStore.renameFiles();
 
                 if (settingsStore.clearOnRename) {
                     fileStore.clearFiles();

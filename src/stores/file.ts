@@ -52,6 +52,20 @@ export const useFileStore = defineStore('file', {
         },
 
         /**
+         * Rename all the files to their new name
+         */
+        renameFiles() {
+            this.files.forEach((file: SelectedFileInterface) => {
+                file.rename();
+
+                // Watch the new path
+                chokidar.watch(file.path).once('unlink', () => {
+                    this.removeFileByPath(file.path);
+                });
+            });
+        },
+
+        /**
          * Remove a file by its path
          */
         removeFileByPath(path: string) {
